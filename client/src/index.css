@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  h1, h2, h3 {
+    font-family: 'DM Serif Display', Georgia, serif;
+  }
+
+  code, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  .stat-card {
+    @apply bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5 transition-all hover:shadow-md;
+  }
+
+  .table-row-hover {
+    @apply hover:bg-base-200 transition-colors cursor-pointer;
+  }
+
+  .badge-phase {
+    @apply badge badge-sm font-mono font-medium;
+  }
+
+  .amount-positive {
+    @apply text-success font-semibold font-mono;
+  }
+
+  .amount-negative {
+    @apply text-error font-semibold font-mono;
+  }
+
+  .amount-zero {
+    @apply text-base-content/50 font-mono;
+  }
+}
+
+/* Smooth sidebar transition */
+.sidebar-enter {
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+}
+.sidebar-enter-active {
+  transform: translateX(0);
+}
+
+/* Alert pulse for critical */
+@keyframes alertPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.alert-critical-pulse {
+  animation: alertPulse 2s ease-in-out infinite;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--bc) / 0.15); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--bc) / 0.3); }

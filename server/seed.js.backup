@@ -1,0 +1,134 @@
+require('dotenv').config();
+const mongoose = require('mongoose');
+const { addDays, subDays, subMonths } = require('date-fns');
+
+const Client = require('./models/Client');
+const Sponsor = require('./models/Sponsor');
+const Payment = require('./models/Payment');
+const Alert = require('./models/Alert');
+
+async function seed() {
+  await mongoose.connect(process.env.MONGO_URI);
+  console.log('Connected. Clearing existing data...');
+
+  await Promise.all([
+    Client.deleteMany({}),
+    Sponsor.deleteMany({}),
+    Payment.deleteMany({}),
+    Alert.deleteMany({}),
+  ]);
+
+  // ── Sponsors ─────────────────────────────────────────────────────────
+  const [sponsorA, sponsorB, sponsorC] = await Sponsor.insertMany([
+    { name: 'Margaret Wanjiku', phone: '+254 712 345 678', email: 'margaret@email.com', relationship: 'family', address: 'Karen, Nairobi' },
+    { name: 'Peter Kamau Ltd', phone: '+254 733 000 111', email: 'peter@kamaultd.co.ke', relationship: 'employer', address: 'Westlands, Nairobi' },
+    { name: 'Hope Foundation NGO', phone: '+254 700 222 333', email: 'admin@hopefoundation.org', relationship: 'ngo', address: 'Upper Hill, Nairobi' },
+  ]);
+
+  const now = new Date();
+
+  // ── Clients ──────────────────────────────────────────────────────────
+  const [clientA, clientB, clientC, clientD, clientE] = await Client.insertMany([
+    {
+      // Active, within duration, has balance due
+      name: 'James Odhiambo',
+      gender: 'male',
+      dateOfAdmission: subDays(now, 45),
+      agreedDurationMonths: 3,
+      monthlyFee: 60000,
+      medicalFee: 35000,
+      depositAmount: 15000,
+      status: 'active',
+      sponsor: sponsorA._id,
+    },
+    {
+      // Active, POST-EXPIRY – daily charges accumulating
+      name: 'Alice Muthoni',
+      gender: 'female',
+      dateOfAdmission: subDays(now, 100),
+      agreedDurationMonths: 3,
+      monthlyFee: 45000,
+      medicalFee: 25000,
+      depositAmount: 10000,
+      status: 'active',
+      sponsor: sponsorB._id,
+    },
+    {
+      // Active, 6-month deal, good standing
+      name: 'Brian Otieno',
+      gender: 'male',
+      dateOfAdmission: subMonths(now, 2),
+      agreedDurationMonths: 6,
+      monthlyFee: 80000,
+      medicalFee: 40000,
+      depositAmount: 20000,
+      status: 'active',
+      sponsor: sponsorC._id,
+    },
+    {
+      // Discharged
+      name: 'Grace Njeri',
+      gender: 'female',
+      dateOfAdmission: subMonths(now, 4),
+      dateOfDischarge: subDays(now, 15),
+      agreedDurationMonths: 3,
+      monthlyFee: 55000,
+      medicalFee: 30000,
+      depositAmount: 12000,
+      status: 'discharged',
+    },
+    {
+      // Absconded
+      name: 'Samuel Kipchoge',
+      gender: 'male',
+      dateOfAdmission: subMonths(now, 2),
+      agreedDurationMonths: 3,
+      monthlyFee: 50000,
+      medicalFee: 28000,
+      depositAmount: 10000,
+      status: 'absconded',
+      comments: 'Left without notice on week 6',
+    },
+  ]);
+
+  // ── Payments ─────────────────────────────────────────────────────────
+  await Payment.insertMany([
+    // James Odhiambo (45 days in, 3-month deal)
+    { client: clientA._id, amount: 15000, paymentDate: subDays(now, 45), paymentType: 'deposit', paidBy: 'Margaret Wanjiku', billingPeriodLabel: 'Admission Deposit', paymentMethod: 'mpesa', reference: 'MPE001' },
+    { client: clientA._id, amount: 80000, paymentDate: subDays(now, 28), paymentType: 'monthly_fee', paidBy: 'Margaret Wanjiku', billingPeriodLabel: 'Month 1 – Monthly + Medical', paymentMethod: 'bank_transfer', reference: 'BNK2024-01' },
+
+    // Alice Muthoni (100 days in, 3-month deal = POST EXPIRY since day 90)
+    { client: clientB._id, amount: 10000, paymentDate: subDays(now, 100), paymentType: 'deposit', paidBy: 'Peter Kamau Ltd', billingPeriodLabel: 'Admission Deposit', paymentMethod: 'cash' },
+    { client: clientB._id, amount: 70000, paymentDate: subDays(now, 70), paymentType: 'monthly_fee', paidBy: 'Peter Kamau Ltd', billingPeriodLabel: 'Month 1', paymentMethod: 'mpesa' },
+    { client: clientB._id, amount: 45000, paymentDate: subDays(now, 40), paymentType: 'monthly_fee', paidBy: 'Peter Kamau Ltd', billingPeriodLabel: 'Month 2', paymentMethod: 'mpesa' },
+    { client: clientB._id, amount: 45000, paymentDate: subDays(now, 10), paymentType: 'monthly_fee', paidBy: 'Peter Kamau Ltd', billingPeriodLabel: 'Month 3', paymentMethod: 'mpesa' },
+
+    // Brian Otieno (2 months in, 6-month deal)
+    { client: clientC._id, amount: 20000, paymentDate: subMonths(now, 2), paymentType: 'deposit', paidBy: 'Hope Foundation NGO', billingPeriodLabel: 'Admission Deposit', paymentMethod: 'bank_transfer' },
+    { client: clientC._id, amount: 120000, paymentDate: subMonths(now, 1), paymentType: 'monthly_fee', paidBy: 'Hope Foundation NGO', billingPeriodLabel: 'Month 1', paymentMethod: 'bank_transfer', reference: 'HF-2024-09' },
+    // Overpayment on month 2
+    { client: clientC._id, amount: 110000, paymentDate: subDays(now, 5), paymentType: 'monthly_fee', paidBy: 'Hope Foundation NGO', billingPeriodLabel: 'Month 2 (overpaid)', paymentMethod: 'bank_transfer', notes: 'Overpaid by 30k – credit to next month' },
+
+    // Grace Njeri (discharged)
+    { client: clientD._id, amount: 12000, paymentDate: subMonths(now, 4), paymentType: 'deposit', paymentMethod: 'cash' },
+    { client: clientD._id, amount: 85000, paymentDate: subMonths(now, 3), paymentType: 'monthly_fee', paymentMethod: 'mpesa' },
+    { client: clientD._id, amount: 55000, paymentDate: subMonths(now, 2), paymentType: 'monthly_fee', paymentMethod: 'mpesa' },
+    { client: clientD._id, amount: 55000, paymentDate: subMonths(now, 1), paymentType: 'monthly_fee', paymentMethod: 'mpesa' },
+  ]);
+
+  console.log('✅ Seed complete!');
+  console.log(`   Sponsors: 3`);
+  console.log(`   Clients:  5 (3 active, 1 discharged, 1 absconded)`);
+  console.log(`   Payments: 13`);
+  console.log(`\nNotable scenarios:`);
+  console.log(`   🚨 Alice Muthoni  – POST-EXPIRY (day ${Math.floor((now - subDays(now, 100)) / 86400000)} of stay, ~10 days of daily charges)`);
+  console.log(`   💰 Brian Otieno   – Credit/overpayment scenario`);
+  console.log(`   📅 James Odhiambo – Month 2 fee coming up`);
+
+  await mongoose.disconnect();
+}
+
+seed().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
