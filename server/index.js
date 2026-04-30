@@ -44,7 +44,7 @@ app.use((err, req, res, next) => {
 });
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
 
@@ -54,7 +54,7 @@ mongoose.connect(process.env.MONGO_URI)
     });
 
     // Schedule daily alert job at midnight
-    cron.schedule('0 0 * * *', () => {
+    cron.schedule(process.env.ALERT_CRON || '0 0 * * *', () => {
       console.log('⏰ Running daily alert job...');
       runDailyAlertJob();
     });

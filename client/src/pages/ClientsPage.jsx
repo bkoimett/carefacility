@@ -5,6 +5,7 @@ import { useFetch, useAsync } from '../hooks/useFetch'
 import { formatKES, formatDate, getStatusColor, getPhaseLabel, daysUntilExpiry } from '../utils/formatters'
 import { PageHeader, Spinner, EmptyState, ErrorState, Modal, BalanceDisplay } from '../components/ui'
 import ClientForm from '../components/clients/ClientForm'
+import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function ClientsPage() {
   const navigate = useNavigate()
@@ -35,6 +36,8 @@ export default function ClientsPage() {
   }
 
   if (error) return <ErrorState message={error} onRetry={refetch} />
+
+  if (loading) return <LoadingSpinner size="lg" message="Loading clients..." />
 
   return (
     <div className="space-y-5">

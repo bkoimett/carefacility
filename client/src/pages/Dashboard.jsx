@@ -7,6 +7,7 @@ import {
 import { dashboardApi, alertsApi } from '../utils/api'
 import { formatKES, formatDate, getAlertTypeIcon, timeAgo } from '../utils/formatters'
 import { StatCard, Spinner, ErrorState, PageHeader } from '../components/ui'
+import LoadingSpinner from '../components/LoadingSpinner'
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
@@ -36,11 +37,7 @@ export default function Dashboard() {
     load()
   }, [])
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <Spinner size="lg" />
-    </div>
-  )
+  if (loading) return <LoadingSpinner size="lg" message="Loading dashboard data..." />
 
   if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />
 

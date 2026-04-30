@@ -13,6 +13,7 @@ import ClientForm from '../components/clients/ClientForm'
 import PaymentForm from '../components/payments/PaymentForm'
 import PaymentLedger from '../components/payments/PaymentLedger'
 import BillingBreakdown from '../components/payments/BillingBreakdown'
+import LoadingSpinner from '../components/LoadingSpinner'
 
 const TABS = ['Overview', 'Billing', 'Payments', 'Alerts']
 
@@ -62,9 +63,7 @@ export default function ClientDetailPage() {
     refetch()
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64"><Spinner size="lg" /></div>
-  )
+  if (loading) return <LoadingSpinner size="lg" message="Loading client details..." />
   if (error) return <ErrorState message={error} onRetry={refetch} />
   if (!client) return <ErrorState message="Client not found" />
 
