@@ -5,7 +5,10 @@ import { useFetch, useAsync } from '../hooks/useFetch'
 import { formatKES, formatDate, getStatusColor, getPhaseLabel, daysUntilExpiry } from '../utils/formatters'
 import { PageHeader, Spinner, EmptyState, ErrorState, Modal, BalanceDisplay } from '../components/ui'
 import ClientForm from '../components/clients/ClientForm'
-import LoadingSpinner from '../components/LoadingSpinner'
+import { TableSkeleton } from '../components/SkeletonLoader'
+import { validateClient } from '../utils/validation'
+import ValidationSummary from '../components/ValidationSummary'
+import { showError, showSuccess } from '../components/ToastNotifications'
 
 export default function ClientsPage() {
   const navigate = useNavigate()
@@ -23,11 +26,19 @@ export default function ClientsPage() {
   const clients = data?.data || data || []
   const pagination = data?.pagination
 
-  const handleCreate = async (formData) => {
-    await run(() => clientsApi.create(formData))
-    document.getElementById('client-modal').close()
-    refetch()
-  }
+   const handleCreate = async (formData) => {
+     // Frontend validation
+     const validation = validateClient(formData);
+     if (!validation.isValid) {
+       showValidationErrors(validation.errors);
+       return;
+     }
+     
+     await run(() => clientsApi.create(formData));
+     document.getElementById('client-modal').close();
+     refetch();
+     showSuccess('Client created successfully');
+   }
 
   const handleDelete = async (id, name) => {
     if (!confirm(`Delete ${name}? This removes all payments and alerts.`)) return
@@ -37,7 +48,7 @@ export default function ClientsPage() {
 
   if (error) return <ErrorState message={error} onRetry={refetch} />
 
-  if (loading) return <LoadingSpinner size="lg" message="Loading clients..." />
+   if (loading) return <TableSkeleton />;
 
   return (
     <div className="space-y-5">

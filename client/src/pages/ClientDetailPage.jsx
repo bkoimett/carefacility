@@ -13,7 +13,10 @@ import ClientForm from '../components/clients/ClientForm'
 import PaymentForm from '../components/payments/PaymentForm'
 import PaymentLedger from '../components/payments/PaymentLedger'
 import BillingBreakdown from '../components/payments/BillingBreakdown'
-import LoadingSpinner from '../components/LoadingSpinner'
+import { DetailSkeleton } from '../components/SkeletonLoader'
+import { validateClient, validatePayment } from '../utils/validation'
+import ValidationSummary from '../components/ValidationSummary'
+import { showError, showSuccess, showValidationErrors } from '../components/ToastNotifications'
 
 const TABS = ['Overview', 'Billing', 'Payments', 'Alerts']
 
@@ -34,17 +37,33 @@ export default function ClientDetailPage() {
   const payments = client?.payments || []
   const alerts = client?.alerts || []
 
-  const handleUpdateClient = async (formData) => {
-    await run(() => clientsApi.update(id, formData))
-    document.getElementById('edit-client-modal').close()
-    refetch()
-  }
+   const handleUpdateClient = async (formData) => {
+     // Frontend validation
+     const validation = validateClient(formData);
+     if (!validation.isValid) {
+       showValidationErrors(validation.errors);
+       return;
+     }
+     
+     await run(() => clientsApi.update(id, formData))
+     document.getElementById('edit-client-modal').close()
+     refetch()
+     showSuccess('Client updated successfully')
+   }
 
-  const handleAddPayment = async (formData) => {
-    await run(() => paymentsApi.create({ ...formData, clientId: id }))
-    document.getElementById('payment-modal').close()
-    refetch()
-  }
+   const handleAddPayment = async (formData) => {
+     // Frontend validation
+     const validation = validatePayment(formData);
+     if (!validation.isValid) {
+       showValidationErrors(validation.errors);
+       return;
+     }
+     
+     await run(() => paymentsApi.create({ ...formData, clientId: id }))
+     document.getElementById('payment-modal').close()
+     refetch()
+     showSuccess('Payment recorded successfully')
+   }
 
   const handleDeletePayment = async (paymentId) => {
     if (!confirm('Delete this payment entry?')) return
@@ -63,7 +82,7 @@ export default function ClientDetailPage() {
     refetch()
   }
 
-  if (loading) return <LoadingSpinner size="lg" message="Loading client details..." />
+   if (loading) return <DetailSkeleton />;
   if (error) return <ErrorState message={error} onRetry={refetch} />
   if (!client) return <ErrorState message="Client not found" />
 

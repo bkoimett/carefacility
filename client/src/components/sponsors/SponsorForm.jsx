@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { FormField } from '../ui'
+import { validateSponsor } from '../../utils/validation'
+import ValidationSummary from '../../components/ValidationSummary'
+import { showError } from '../../components/ToastNotifications'
 
 const defaultForm = {
   name: '',
@@ -12,6 +15,7 @@ const defaultForm = {
 
 export default function SponsorForm({ initial, onSubmit, loading }) {
   const [form, setForm] = useState(initial || defaultForm)
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     if (initial) setForm({ ...defaultForm, ...initial })
@@ -21,11 +25,25 @@ export default function SponsorForm({ initial, onSubmit, loading }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    
+    // Validate form data
+    const validation = validateSponsor(form);
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      showError('Please fix the validation errors');
+      return;
+    }
+    
+    // Clear errors if validation passes
+    setErrors({});
+    
     onSubmit(form)
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <ValidationSummary errors={errors} title="Please fix the following errors:" />
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField label="Full Name" required>
           <input

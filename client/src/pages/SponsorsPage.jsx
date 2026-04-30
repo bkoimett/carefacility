@@ -4,6 +4,10 @@ import { sponsorsApi } from '../utils/api'
 import { useFetch, useAsync } from '../hooks/useFetch'
 import { PageHeader, Spinner, EmptyState, ErrorState, Modal } from '../components/ui'
 import SponsorForm from '../components/sponsors/SponsorForm'
+import { TableSkeleton } from '../components/SkeletonLoader'
+import { validateSponsor } from '../utils/validation'
+import ValidationSummary from '../components/ValidationSummary'
+import { showError, showSuccess, showValidationErrors } from '../components/ToastNotifications'
 
 const RELATIONSHIP_COLORS = {
   family: 'badge-primary',
@@ -38,11 +42,19 @@ export default function SponsorsPage() {
 
   const sponsors = data || []
 
-  const handleCreate = async (formData) => {
-    await run(() => sponsorsApi.create(formData))
-    document.getElementById('sponsor-modal').close()
-    refetch()
-  }
+   const handleCreate = async (formData) => {
+     // Frontend validation
+     const validation = validateSponsor(formData);
+     if (!validation.isValid) {
+       showValidationErrors(validation.errors);
+       return;
+     }
+     
+     await run(() => sponsorsApi.create(formData))
+     document.getElementById('sponsor-modal').close()
+     refetch()
+     showSuccess('Sponsor added successfully')
+   }
 
   const handleUpdate = async (formData) => {
     await run(() => sponsorsApi.update(editTarget._id, formData))
@@ -88,10 +100,10 @@ export default function SponsorsPage() {
         onChange={e => setSearch(e.target.value)}
       />
 
-      {/* Grid */}
-      {loading ? (
-        <div className="flex justify-center py-16"><Spinner size="lg" /></div>
-      ) : sponsors.length === 0 ? (
+       {/* Grid */}
+       {loading ? (
+         <TableSkeleton />
+       ) : sponsors.length === 0 ? (
         <EmptyState
           icon="🤝"
           title="No sponsors found"

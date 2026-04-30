@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { sponsorsApi } from '../../utils/api'
 import { FormField } from '../ui'
+import { validateClient } from '../../utils/validation'
+import ValidationSummary from '../../components/ValidationSummary'
+import { showError } from '../../components/ToastNotifications'
 
 const defaultForm = {
   name: '',
@@ -20,6 +23,7 @@ const defaultForm = {
 export default function ClientForm({ initial, onSubmit, loading }) {
   const [form, setForm] = useState(initial || defaultForm)
   const [sponsors, setSponsors] = useState([])
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     sponsorsApi.getAll().then(r => setSponsors(r.data.data || [])).catch(() => {})
@@ -37,6 +41,18 @@ export default function ClientForm({ initial, onSubmit, loading }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    
+    // Validate form data
+    const validation = validateClient(form);
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      showError('Please fix the validation errors');
+      return;
+    }
+    
+    // Clear errors if validation passes
+    setErrors({});
+    
     const data = { ...form }
     if (!data.customDailyRate) delete data.customDailyRate
     if (!data.sponsor) delete data.sponsor
@@ -49,6 +65,8 @@ export default function ClientForm({ initial, onSubmit, loading }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <ValidationSummary errors={errors} title="Please fix the following errors:" />
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField label="Full Name" required>
           <input className="input input-bordered input-sm w-full" value={form.name} onChange={set('name')} required placeholder="e.g. John Doe" />
