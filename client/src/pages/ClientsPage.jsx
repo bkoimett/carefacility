@@ -51,16 +51,32 @@ export default function ClientsPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 lg:mb-8">
-        <div>
-          <h1 className="text-2xl font-semibold text-[#F0F4FF]">Clients</h1>
-          <p className="text-[#3D4F6B] text-sm mt-1">
-            {data?.counts?.active ?? 0} active clients
-          </p>
+      {/* Page Header - shown on all screens */}
+      <div className="mb-6 lg:mb-8">
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl lg:text-2xl font-semibold text-[#F0F4FF] font-['DM_Serif_Display']">Clients</h1>
         </div>
+        <p className="text-[#3D4F6B] text-sm mt-1 ml-0">Manage resident clients and track billing</p>
+        <p className="text-[#3D4F6B] text-sm mt-0.5 ml-0">{data?.counts?.active ?? 0} active clients</p>
+      </div>
+
+      {/* Add Client Button - visible on all screens */}
+      <div className="lg:hidden mb-6">
         <button
-          className="btn-premium flex items-center gap-2 w-full sm:w-auto"
+          className="btn-premium flex items-center gap-2 w-full justify-center"
+          onClick={() => document.getElementById('client-modal').showModal()}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Add Client
+        </button>
+      </div>
+
+      {/* Add Client Button - Desktop */}
+      <div className="hidden lg:block mb-6">
+        <button
+          className="btn-premium flex items-center gap-2"
           onClick={() => document.getElementById('client-modal').showModal()}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -57,12 +57,18 @@ export default function Dashboard() {
   const totalAlerts = (stats?.alerts?.critical || 0) + (stats?.alerts?.warning || 0) + (stats?.alerts?.info || 0)
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
-      {loading ? (
-        <DashboardSkeleton />
-      ) : (
-        <>
-           {/* Stat Cards Row */}
+     <div className="p-4 sm:p-6 lg:p-8">
+       {loading ? (
+         <DashboardSkeleton />
+       ) : (
+         <>
+           {/* Page Header - shown on all screens */}
+           <div className="mb-6 lg:mb-8">
+             <div className="flex items-center gap-2">
+               <h2 className="text-xl lg:text-2xl font-semibold text-[#F0F4FF] font-['DM_Serif_Display']">Dashboard</h2>
+             </div>
+             <p className="text-[#3D4F6B] text-sm mt-1 ml-0">Overview of facility operations</p>
+           </div>
            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
             {/* Active Clients */}
             <div className="card-premium p-6 relative overflow-hidden hover:-translate-y-0.5 transition-transform duration-200">

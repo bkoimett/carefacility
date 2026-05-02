@@ -78,20 +78,24 @@ export default function SponsorsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader
-        title="Sponsors"
-        subtitle={`${sponsors.length} registered sponsors`}
-        actions={
-          <button
-            className="btn btn-primary btn-sm gap-1"
-            onClick={() => document.getElementById('sponsor-modal').showModal()}
-          >
-            <span>+</span> Add Sponsor
-          </button>
-        }
-      />
+      {/* Page Header */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl lg:text-2xl font-semibold text-[#F0F4FF] font-['DM_Serif_Display']">Sponsors</h2>
+        </div>
+        <p className="text-[#3D4F6B] text-sm mt-1 ml-0">Sponsors and funding sources for resident support</p>
+        <p className="text-[#3D4F6B] text-sm mt-0.5 ml-0">{sponsors.length} registered sponsors</p>
+      </div>
 
-      {/* Search */}
+      {/* Add Sponsor Button */}
+      <div className="mb-6">
+        <button
+          className="btn btn-primary btn-sm gap-1"
+          onClick={() => document.getElementById('sponsor-modal').showModal()}
+        >
+          <span>+</span> Add Sponsor
+        </button>
+      </div>
       <input
         type="search"
         placeholder="Search by name or phone..."
@@ -100,25 +104,35 @@ export default function SponsorsPage() {
         onChange={e => setSearch(e.target.value)}
       />
 
-       {/* Grid */}
-       {loading ? (
-         <TableSkeleton />
-       ) : sponsors.length === 0 ? (
-        <EmptyState
-          icon="🤝"
-          title="No sponsors found"
-          message="Add your first sponsor to start linking them to clients"
-          action={
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={() => document.getElementById('sponsor-modal').showModal()}
-            >
-              Add Sponsor
-            </button>
-          }
-        />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Add Sponsor Button - mobile only
+      // <div className="block lg:hidden">
+      //   <button
+      //     className="btn btn-primary btn-sm w-full gap-1"
+      //     onClick={() => document.getElementById('sponsor-modal').showModal()}
+      //   >
+      //     <span>+</span> Add Sponsor
+      //   </button>
+      // </div> */}
+
+        {/* Grid */}
+        {loading ? (
+          <TableSkeleton />
+        ) : sponsors.length === 0 ? (
+         <EmptyState
+           icon="🤝"
+           title="No sponsors found"
+           message="Add your first sponsor to start linking them to clients"
+           action={
+             <button
+               className="btn btn-primary btn-sm"
+               onClick={() => document.getElementById('sponsor-modal').showModal()}
+             >
+               Add Sponsor
+             </button>
+           }
+         />
+       ) : (
+         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {sponsors.map(sponsor => (
             <div
               key={sponsor._id}

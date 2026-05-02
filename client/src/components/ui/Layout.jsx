@@ -39,8 +39,6 @@ export default function Layout() {
 
   const isActive = (to) => location.pathname === to
 
-  const pageTitle = navItems.find(item => item.to === location.pathname)?.label || 'Dashboard'
-
   return (
     <div className="flex min-h-screen bg-[#070D19]">
       {/* Mobile Backdrop */}
@@ -51,13 +49,13 @@ export default function Layout() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex w-64 bg-[#0B1426] border-r border-[#1A263D] flex-col h-screen sticky top-0 p-6">
         {/* Logo Area */}
         <div className="mb-10">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#06B6D4] to-[#0891B2] flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
+            <div className="w-8 h-8 rounded-lg bg-[#070D19] border border-[#1A263D] flex items-center justify-center overflow-hidden">
+              <img src="https://res.cloudinary.com/deci4v6zv/image/upload/v1762617272/the-serenity-place-logo-2026-removebg_ze7l7v.png" alt="TSP" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="text-[#F0F4FF] font-semibold text-base">TSP</h1>
@@ -99,11 +97,11 @@ export default function Layout() {
         {/* Bottom Section */}
         <div className="border-t border-[#1A263D] pt-4 mt-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1A263D] to-[#0B1426] ring-1 ring-[#1A263D] flex items-center justify-center">
-              <span className="text-[#06B6D4] text-xs font-bold">JD</span>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0B1426] to-[#070D19] ring-1 ring-[#1A263D] flex items-center justify-center overflow-hidden">
+              <img src="https://res.cloudinary.com/deci4v6zv/image/upload/v1762617272/the-serenity-place-logo-2026-removebg_ze7l7v.png" alt="Bkoimett" className="w-full h-full object-contain" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[#F0F4FF] text-sm font-medium truncate">John Doe</p>
+              <p className="text-[#F0F4FF] text-sm font-medium truncate">Bkoimett</p>
               <p className="text-[#3D4F6B] text-xs truncate">Administrator</p>
             </div>
           </div>
@@ -131,8 +129,8 @@ export default function Layout() {
         {/* Logo Area */}
         <div className="mb-10">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#06B6D4] to-[#0891B2] flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
+            <div className="w-8 h-8 rounded-lg bg-[#070D19] border border-[#1A263D] flex items-center justify-center overflow-hidden">
+              <img src="https://res.cloudinary.com/deci4v6zv/image/upload/v1762617272/the-serenity-place-logo-2026-removebg_ze7l7v.png" alt="TSP" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="text-[#F0F4FF] font-semibold text-base">TSP</h1>
@@ -174,11 +172,11 @@ export default function Layout() {
         {/* Bottom Section */}
         <div className="border-t border-[#1A263D] pt-4 mt-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1A263D] to-[#0B1426] ring-1 ring-[#1A263D] flex items-center justify-center">
-              <span className="text-[#06B6D4] text-xs font-bold">JD</span>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0B1426] to-[#070D19] ring-1 ring-[#1A263D] flex items-center justify-center overflow-hidden">
+              <img src="https://res.cloudinary.com/deci4v6zv/image/upload/v1762617272/the-serenity-place-logo-2026-removebg_ze7l7v.png" alt="Bkoimett" className="w-full h-full object-contain" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[#F0F4FF] text-sm font-medium truncate">John Doe</p>
+              <p className="text-[#F0F4FF] text-sm font-medium truncate">Bkoimett</p>
               <p className="text-[#3D4F6B] text-xs truncate">Administrator</p>
             </div>
           </div>
@@ -201,14 +199,9 @@ export default function Layout() {
               <Menu width={16} height={16} />
             </button>
             <div>
-              <h2 className="text-[#F0F4FF] text-xl font-semibold truncate max-w-[180px] sm:max-w-none">{pageTitle}</h2>
-              <p className="text-[#3D4F6B] text-xs mt-0.5">
-                {location.pathname === '/dashboard' && 'Overview of facility operations'}
-                {location.pathname === '/clients' && 'Manage resident clients'}
-                {location.pathname === '/sponsors' && 'Sponsors and funding sources'}
-                {location.pathname === '/payments' && 'Payment tracking and ledgers'}
-                {location.pathname === '/alerts' && 'System alerts and notifications'}
-              </p>
+              <div className="flex items-center gap-2">
+                <h2 className="text-[#F0F4FF] text-sm font-medium tracking-wide">TSP · Billing Suite</h2>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -228,8 +221,8 @@ export default function Layout() {
             </button>
             <div className="w-px h-5 bg-[#1A263D]"></div>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1A263D] to-[#0B1426] ring-1 ring-[#1A263D] flex items-center justify-center">
-                <span className="text-[#06B6D4] text-xs font-bold">JD</span>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1A263D] to-[#0B1426] ring-1 ring-[#1A263D] flex items-center justify-center overflow-hidden">
+                <img src="https://res.cloudinary.com/deci4v6zv/image/upload/v1762617272/the-serenity-place-logo-2026-removebg_ze7l7v.png" alt="Bkoimett" className="w-full h-full object-contain" />
               </div>
             </div>
           </div>

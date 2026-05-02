@@ -89,17 +89,20 @@ export default function AlertsPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 lg:mb-8">
-        <div>
-          <h1 className="text-2xl font-semibold text-[#F0F4FF]">Alerts</h1>
-          <p className="text-[#3D4F6B] text-sm mt-1">
-            {unreadCount > 0 ? `${unreadCount} unread · ${allAlerts.length} total` : `${allAlerts.length} alerts`}
-          </p>
+      {/* Page Header - shown on all screens */}
+      <div className="mb-6 lg:mb-8">
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl lg:text-2xl font-semibold text-[#F0F4FF] font-['DM_Serif_Display']">Alerts</h1>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+        <p className="text-[#3D4F6B] text-sm mt-1 ml-0">System alerts and notifications</p>
+        <p className="text-[#3D4F6B] text-sm mt-0.5 ml-0">{unreadCount > 0 ? `${unreadCount} unread · ${allAlerts.length} total` : `${allAlerts.length} alerts`}</p>
+      </div>
+
+      {/* Page actions - mobile only */}
+      <div className="lg:hidden gap-2 mb-6">
+        <div className="flex gap-2">
           <button
-            className="btn-premium flex items-center gap-2 justify-center w-full sm:w-auto"
+            className="btn-premium flex items-center gap-2 justify-center flex-1"
             onClick={handleTriggerJob}
             disabled={actioning}
           >
@@ -114,7 +117,7 @@ export default function AlertsPage() {
           </button>
           {unreadCount > 0 && (
             <button
-              className="btn-premium flex items-center gap-2 justify-center w-full sm:w-auto"
+              className="btn-premium flex items-center gap-2 justify-center flex-1"
               onClick={handleMarkAllRead}
               disabled={actioning}
             >
@@ -127,7 +130,7 @@ export default function AlertsPage() {
         </div>
       </div>
 
-      {/* Summary Banners */}
+      {/* Critical/Warning summaries */}
       {(criticalCount > 0 || warningCount > 0) && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           {criticalCount > 0 && (
@@ -149,7 +152,7 @@ export default function AlertsPage() {
               <span className="text-[#F59E0B] text-sm font-medium">
                 {warningCount} warning{warningCount !== 1 ? 's' : ''} need review
               </span>
-            </div>
+             </div>
           )}
         </div>
       )}
