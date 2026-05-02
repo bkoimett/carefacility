@@ -104,11 +104,6 @@ export const validateSponsor = (data) => {
     }
   }
 
-  // Monthly amount validation
-  if (!data.monthlyAmount || parseFloat(data.monthlyAmount) <= 0) {
-    errors.monthlyAmount = 'Monthly amount must be greater than 0';
-  }
-
   return {
     isValid: Object.keys(errors).length === 0,
     errors,

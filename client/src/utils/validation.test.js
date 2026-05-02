@@ -130,7 +130,7 @@ describe('validateSponsor', () => {
     const data = {
       name: 'Acme Corp',
       email: 'contact@acme.com',
-      monthlyAmount: 500
+      relationship: 'family'
     };
     
     const result = validateSponsor(data);
@@ -141,8 +141,7 @@ describe('validateSponsor', () => {
   it('should invalidate sponsor with missing name', () => {
     const data = {
       name: '',
-      email: 'contact@acme.com',
-      monthlyAmount: 500
+      email: 'contact@acme.com'
     };
     
     const result = validateSponsor(data);
@@ -153,8 +152,7 @@ describe('validateSponsor', () => {
   it('should invalidate sponsor with invalid email', () => {
     const data = {
       name: 'Acme Corp',
-      email: 'invalid-email',
-      monthlyAmount: 500
+      email: 'invalid-email'
     };
     
     const result = validateSponsor(data);
@@ -162,22 +160,9 @@ describe('validateSponsor', () => {
     expect(result.errors.email).toBe('Invalid email format');
   });
 
-  it('should invalidate sponsor with monthlyAmount <= 0', () => {
+  it('should validate sponsor with optional fields omitted', () => {
     const data = {
-      name: 'Acme Corp',
-      email: 'contact@acme.com',
-      monthlyAmount: 0
-    };
-    
-    const result = validateSponsor(data);
-    expect(result.isValid).toBe(false);
-    expect(result.errors.monthlyAmount).toBe('Monthly amount must be greater than 0');
-  });
-
-  it('should validate sponsor with optional email omitted', () => {
-    const data = {
-      name: 'Acme Corp',
-      monthlyAmount: 500
+      name: 'Acme Corp'
     };
     
     const result = validateSponsor(data);

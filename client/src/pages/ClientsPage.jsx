@@ -6,8 +6,6 @@ import { formatKES, formatDate, getStatusColor, getPhaseLabel, daysUntilExpiry }
 import { PageHeader, Spinner, EmptyState, ErrorState, Modal, BalanceDisplay } from '../components/ui'
 import ClientForm from '../components/clients/ClientForm'
 import { TableSkeleton } from '../components/SkeletonLoader'
-import { validateClient } from '../utils/validation'
-import ValidationSummary from '../components/ValidationSummary'
 import { showError, showSuccess } from '../components/ToastNotifications'
 
 export default function ClientsPage() {
@@ -26,19 +24,16 @@ export default function ClientsPage() {
   const clients = data?.data || data || []
   const pagination = data?.pagination
 
-   const handleCreate = async (formData) => {
-     // Frontend validation
-     const validation = validateClient(formData);
-     if (!validation.isValid) {
-       showValidationErrors(validation.errors);
-       return;
-     }
-     
-     await run(() => clientsApi.create(formData));
-     document.getElementById('client-modal').close();
-     refetch();
-     showSuccess('Client created successfully');
-   }
+const handleCreate = async (formData) => {
+      try {
+        await run(() => clientsApi.create(formData));
+        document.getElementById('client-modal')?.close();
+        refetch();
+        showSuccess('Client created successfully');
+      } catch (err) {
+        showError(err.message || 'Failed to create client');
+      }
+    }
 
   const handleDelete = async (id, name) => {
     if (!confirm(`Delete ${name}? This removes all payments and alerts.`)) return

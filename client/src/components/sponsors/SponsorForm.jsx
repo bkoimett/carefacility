@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react'
 import { FormField } from '../ui'
-import { validateSponsor } from '../../utils/validation'
-import ValidationSummary from '../../components/ValidationSummary'
-import { showError } from '../../components/ToastNotifications'
 
 const defaultForm = {
   name: '',
@@ -15,7 +12,6 @@ const defaultForm = {
 
 export default function SponsorForm({ initial, onSubmit, loading }) {
   const [form, setForm] = useState(initial || defaultForm)
-  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     if (initial) setForm({ ...defaultForm, ...initial })
@@ -25,25 +21,11 @@ export default function SponsorForm({ initial, onSubmit, loading }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    
-    // Validate form data
-    const validation = validateSponsor(form);
-    if (!validation.isValid) {
-      setErrors(validation.errors);
-      showError('Please fix the validation errors');
-      return;
-    }
-    
-    // Clear errors if validation passes
-    setErrors({});
-    
     onSubmit(form)
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <ValidationSummary errors={errors} title="Please fix the following errors:" />
-      
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField label="Full Name" required>
           <input
@@ -100,25 +82,25 @@ export default function SponsorForm({ initial, onSubmit, loading }) {
         />
       </FormField>
 
-      <FormField label="Notes">
-        <textarea
-          className="textarea textarea-bordered w-full text-sm resize-none"
-          rows={2}
-          value={form.notes}
-          onChange={set('notes')}
-          placeholder="Any relevant notes about this sponsor..."
-        />
-      </FormField>
+<FormField label="Notes">
+          <textarea
+            className="textarea textarea-bordered w-full text-sm resize-none"
+            rows={2}
+            value={form.notes}
+            onChange={set('notes')}
+            placeholder="Any relevant notes about this sponsor..."
+          />
+        </FormField>
 
-      <div className="flex justify-end gap-2 pt-1">
-        <form method="dialog">
-          <button className="btn btn-sm btn-ghost" type="submit">Cancel</button>
-        </form>
-        <button type="submit" className="btn btn-sm btn-primary" disabled={loading}>
-          {loading && <span className="loading loading-spinner loading-xs" />}
-          {initial ? 'Save Changes' : 'Add Sponsor'}
-        </button>
-      </div>
-    </form>
-  )
-}
+        <div className="flex justify-end gap-2 pt-1">
+          <form method="dialog">
+            <button className="btn btn-sm btn-ghost" type="button">Cancel</button>
+          </form>
+          <button type="submit" className="btn btn-sm btn-primary" disabled={loading}>
+            {loading && <span className="loading loading-spinner loading-xs" />}
+            {initial ? 'Save Changes' : 'Add Sponsor'}
+          </button>
+        </div>
+      </form>
+    )
+  }

@@ -5,10 +5,12 @@ const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
+      success: false,
       errors: errors.array().map(err => ({
         field: err.param,
         message: err.msg
-      }))
+      })),
+      message: `Validation error: ${errors.array()[0].msg}`
     });
   }
   next();
@@ -19,27 +21,36 @@ const validateClient = [
   body('name')
     .trim()
     .notEmpty()
-    .withMessage('Name is required')
-    .isLength({ min: 2 })
-    .withMessage('Name must be at least 2 characters')
-    .escape(),
-  body('email')
+    .withMessage('Name is required'),
+  body('gender')
     .optional()
-    .isEmail()
-    .withMessage('Valid email format required if provided')
-    .normalizeEmail(),
-  body('phone')
-    .optional()
-    .isMobilePhone()
-    .withMessage('Valid phone number is required if provided'),
+    .isIn(['male', 'female', 'other'])
+    .withMessage('Gender must be male, female, or other'),
+  body('dateOfAdmission')
+    .notEmpty()
+    .withMessage('Admission date is required')
+    .isISO8601()
+    .withMessage('Valid date required'),
+  body('agreedDurationMonths')
+    .isInt({ min: 1, max: 120 })
+    .withMessage('Duration must be between 1 and 120 months'),
   body('monthlyFee')
-    .optional()
     .isFloat({ min: 0 })
-    .withMessage('Monthly fee must be a non-negative number'),
+    .withMessage('Monthly fee is required'),
   body('medicalFee')
-    .optional()
     .isFloat({ min: 0 })
-    .withMessage('Medical fee must be a non-negative number'),
+    .withMessage('Medical fee is required'),
+  body('email')
+    .optional({ checkFalsy: true })
+    .isEmail()
+    .withMessage('Valid email format required if provided'),
+  body('status')
+    .optional()
+    .isIn(['active', 'discharged', 'absconded']),
+  body('sponsor')
+    .optional({ checkFalsy: true })
+    .isMongoId()
+    .withMessage('Valid sponsor ID required'),
   handleValidationErrors
 ];
 
@@ -69,18 +80,7 @@ const validateSponsor = [
   body('name')
     .trim()
     .notEmpty()
-    .withMessage('Name is required')
-    .isLength({ min: 2 })
-    .withMessage('Name must be at least 2 characters')
-    .escape(),
-  body('email')
-    .optional()
-    .isEmail()
-    .withMessage('Valid email format required if provided')
-    .normalizeEmail(),
-  body('monthlyAmount')
-    .isFloat({ min: 0 })
-    .withMessage('Monthly amount must be a positive number'),
+    .withMessage('Name is required'),
   handleValidationErrors
 ];
 

@@ -5,9 +5,7 @@ import { useFetch, useAsync } from '../hooks/useFetch'
 import { PageHeader, Spinner, EmptyState, ErrorState, Modal } from '../components/ui'
 import SponsorForm from '../components/sponsors/SponsorForm'
 import { TableSkeleton } from '../components/SkeletonLoader'
-import { validateSponsor } from '../utils/validation'
-import ValidationSummary from '../components/ValidationSummary'
-import { showError, showSuccess, showValidationErrors } from '../components/ToastNotifications'
+import { showError, showSuccess } from '../components/ToastNotifications'
 
 const RELATIONSHIP_COLORS = {
   family: 'badge-primary',
@@ -42,25 +40,27 @@ export default function SponsorsPage() {
 
   const sponsors = data || []
 
-   const handleCreate = async (formData) => {
-     // Frontend validation
-     const validation = validateSponsor(formData);
-     if (!validation.isValid) {
-       showValidationErrors(validation.errors);
-       return;
-     }
-     
-     await run(() => sponsorsApi.create(formData))
-     document.getElementById('sponsor-modal').close()
-     refetch()
-     showSuccess('Sponsor added successfully')
-   }
+  const handleCreate = async (formData) => {
+    try {
+      await run(() => sponsorsApi.create(formData))
+      document.getElementById('sponsor-modal')?.close()
+      refetch()
+      showSuccess('Sponsor added successfully')
+    } catch (err) {
+      showError(err.message || 'Failed to add sponsor')
+    }
+  }
 
   const handleUpdate = async (formData) => {
-    await run(() => sponsorsApi.update(editTarget._id, formData))
-    document.getElementById('edit-sponsor-modal').close()
-    setEditTarget(null)
-    refetch()
+    try {
+      await run(() => sponsorsApi.update(editTarget._id, formData))
+      document.getElementById('edit-sponsor-modal')?.close()
+      setEditTarget(null)
+      refetch()
+      showSuccess('Sponsor updated successfully')
+    } catch (err) {
+      showError(err.message || 'Failed to update sponsor')
+    }
   }
 
   const handleDelete = async (id, name) => {
