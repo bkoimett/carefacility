@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { sponsorsApi } from '../utils/api'
 import { useFetch, useAsync } from '../hooks/useFetch'
+import { formatKES } from '../utils/formatters'
 import { PageHeader, Spinner, EmptyState, ErrorState, Modal } from '../components/ui'
 import SponsorForm from '../components/sponsors/SponsorForm'
 import { TableSkeleton } from '../components/SkeletonLoader'
 import { showError, showSuccess } from '../components/ToastNotifications'
+import { Building2, Mail, Phone } from 'lucide-react'
 
 const RELATIONSHIP_COLORS = {
   family: 'badge-primary',
@@ -17,14 +19,14 @@ const RELATIONSHIP_COLORS = {
   other: 'badge-ghost',
 }
 
-const RELATIONSHIP_ICONS = {
-  family: '👨‍👩‍👧',
-  friend: '🤝',
-  employer: '💼',
-  ngo: '🏢',
-  government: '🏛️',
-  self: '👤',
-  other: '❓',
+const RELATIONSHIP_LABELS = {
+  family: 'Family',
+  friend: 'Friend',
+  employer: 'Employer',
+  ngo: 'NGO / Charity',
+  government: 'Government',
+  self: 'Self',
+  other: 'Other',
 }
 
 export default function SponsorsPage() {
@@ -76,41 +78,53 @@ export default function SponsorsPage() {
 
   if (error) return <ErrorState message={error} onRetry={refetch} />
 
+  // Calculate totals
+  const totalSponsors = sponsors.length
+  const activeClients = sponsors.reduce((sum, s) => sum + (s.clientCount || 0), 0)
+
   return (
-    <div className="space-y-5">
-      <PageHeader
-        title="Sponsors"
-        subtitle={`${sponsors.length} registered sponsors`}
-        actions={
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+      {/* PAGE HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-xl lg:text-2xl font-semibold text-[#F0F4FF] font-['DM_Serif_Display']">Sponsors</h1>
+          <p className="text-[#3D4F6B] text-sm mt-1">{totalSponsors} sponsors managing {activeClients} active clients</p>
+        </div>
+        <div className="flex items-center gap-3">
           <button
-            className="btn btn-primary btn-sm gap-1"
+            className="btn-premium flex items-center gap-2"
             onClick={() => document.getElementById('sponsor-modal').showModal()}
           >
-            <span>+</span> Add Sponsor
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Add Sponsor
           </button>
-        }
-      />
+        </div>
+      </div>
 
       {/* Search */}
-      <input
-        type="search"
-        placeholder="Search by name or phone..."
-        className="input input-bordered input-sm max-w-sm w-full"
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-      />
+      <div className="max-w-md">
+        <input
+          type="search"
+          placeholder="Search by name or phone..."
+          className="w-full bg-[#0B1426] border border-[#1A263D] rounded-[8px] px-4 py-2.5 text-sm text-[#F0F4FF] placeholder:text-[#3D4F6B] focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[rgba(6,182,212,0.1)] transition-all"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </div>
 
-       {/* Grid */}
-       {loading ? (
-         <TableSkeleton />
-       ) : sponsors.length === 0 ? (
+      {/* SPONSORS GRID */}
+      {loading ? (
+        <TableSkeleton />
+      ) : sponsors.length === 0 ? (
         <EmptyState
           icon="🤝"
           title="No sponsors found"
           message="Add your first sponsor to start linking them to clients"
           action={
             <button
-              className="btn btn-primary btn-sm"
+              className="btn-premium btn-sm"
               onClick={() => document.getElementById('sponsor-modal').showModal()}
             >
               Add Sponsor
@@ -122,90 +136,96 @@ export default function SponsorsPage() {
           {sponsors.map(sponsor => (
             <div
               key={sponsor._id}
-              className="bg-base-100 border border-base-300 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow"
+              className="card-premium p-5 hover:-translate-y-0.5 transition-transform duration-200 group"
             >
-              <div className="flex items-start justify-between mb-3">
+              {/* Top row */}
+              <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-lg">
-                    {RELATIONSHIP_ICONS[sponsor.relationship] || '👤'}
+                  <div className="w-10 h-10 rounded-[10px] bg-[rgba(6,182,212,0.08)] text-[#06B6D4] flex items-center justify-center">
+                    <Building2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm leading-tight">{sponsor.name}</h3>
-                    <span className={`badge badge-xs capitalize mt-0.5 ${RELATIONSHIP_COLORS[sponsor.relationship] || 'badge-ghost'}`}>
-                      {sponsor.relationship}
-                    </span>
+                    <h3 className="text-[#F0F4FF] font-semibold text-sm">{sponsor.name}</h3>
+                    <p className="text-[#3D4F6B] text-xs mt-0.5">
+                      {RELATIONSHIP_LABELS[sponsor.relationship] || sponsor.relationship}
+                    </p>
                   </div>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
-                    className="btn btn-xs btn-ghost"
+                    className="w-7 h-7 rounded-[5px] border border-[#1A263D] text-[#6B7FA3] hover:text-[#06B6D4] hover:border-[#06B6D4] flex items-center justify-center transition-all"
                     onClick={() => openEdit(sponsor)}
-                    title="Edit"
+                    title="Edit sponsor"
                   >
-                    ✏️
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
                   </button>
                   <button
-                    className="btn btn-xs btn-ghost text-error"
+                    className="w-7 h-7 rounded-[5px] border border-[#1A263D] text-[#6B7FA3] hover:text-[#EF4444] hover:border-[#EF4444] flex items-center justify-center transition-all"
                     onClick={() => handleDelete(sponsor._id, sponsor.name)}
-                    title="Delete"
+                    title="Delete sponsor"
                   >
-                    ✕
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-1.5 text-xs text-base-content/60">
-                {sponsor.phone && (
-                  <div className="flex items-center gap-2">
-                    <span>📞</span>
-                    <span className="font-mono">{sponsor.phone}</span>
-                  </div>
-                )}
-                {sponsor.email && (
-                  <div className="flex items-center gap-2 truncate">
-                    <span>✉️</span>
-                    <span className="truncate">{sponsor.email}</span>
-                  </div>
-                )}
-                {sponsor.address && (
-                  <div className="flex items-start gap-2">
-                    <span>📍</span>
-                    <span className="line-clamp-1">{sponsor.address}</span>
-                  </div>
-                )}
+              {/* Divider */}
+              <div className="border-t border-[#1A263D] my-4"></div>
+
+              {/* Stats row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-[#3D4F6B] text-xs mb-1">Active Clients</p>
+                  <p className="text-[#06B6D4] font-bold text-sm">{sponsor.clientCount || 0}</p>
+                </div>
+                <div>
+                  <p className="text-[#3D4F6B] text-xs mb-1">Total Paid</p>
+                  <p className="text-[#10B981] font-bold text-sm">{formatKES(sponsor.totalPaid || 0)}</p>
+                </div>
               </div>
 
-              <div className="mt-3 pt-3 border-t border-base-200 flex items-center justify-between">
-                <span className="text-xs text-base-content/40">
-                  {sponsor.clientCount ?? 0} client{sponsor.clientCount !== 1 ? 's' : ''}
-                </span>
-                {sponsor.clientCount > 0 && (
-                  <button
-                    className="btn btn-xs btn-ghost text-primary"
-                    onClick={() => navigate(`/clients?search=${encodeURIComponent(sponsor.name)}`)}
-                  >
-                    View clients →
-                  </button>
-                )}
-              </div>
+              {/* Contact info */}
+              {(sponsor.phone || sponsor.email) && (
+                <div className="mt-3 space-y-1.5 text-[#3D4F6B] text-xs">
+                  {sponsor.email && (
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-3 h-3" />
+                      <span className="truncate">{sponsor.email}</span>
+                    </div>
+                  )}
+                  {sponsor.phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-3 h-3" />
+                      <span className="font-mono">{sponsor.phone}</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
-              {sponsor.notes && (
-                <p className="text-xs text-base-content/40 mt-2 line-clamp-2 italic">
-                  {sponsor.notes}
-                </p>
+              {/* Bottom link */}
+              {sponsor.clientCount > 0 && (
+                <button
+                  className="text-[#06B6D4] text-xs hover:underline mt-3 flex items-center gap-1"
+                  onClick={() => navigate(`/clients?search=${encodeURIComponent(sponsor.name)}`)}
+                >
+                  View Clients →
+                </button>
               )}
             </div>
           ))}
         </div>
       )}
 
-      {/* Create modal */}
-      <Modal id="sponsor-modal" title="Add New Sponsor">
+      {/* Modals */}
+      <Modal id="sponsor-modal" title="Add New Sponsor" size="max-w-lg">
         <SponsorForm onSubmit={handleCreate} loading={submitting} />
       </Modal>
 
-      {/* Edit modal */}
-      <Modal id="edit-sponsor-modal" title="Edit Sponsor">
+      <Modal id="edit-sponsor-modal" title="Edit Sponsor" size="max-w-lg">
         <SponsorForm
           initial={editTarget}
           onSubmit={handleUpdate}

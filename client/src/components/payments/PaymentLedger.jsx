@@ -11,7 +11,7 @@ const METHOD_ICONS = {
 export default function PaymentLedger({ payments = [], onDelete, runningBalance }) {
   if (payments.length === 0) {
     return (
-      <div className="py-10 text-center text-base-content/30 text-sm">
+      <div className="py-10 text-center text-[#F0F4FF]/30 text-sm">
         No payments recorded yet
       </div>
     )
@@ -31,7 +31,7 @@ export default function PaymentLedger({ payments = [], onDelete, runningBalance 
     <div className="overflow-x-auto">
       <table className="table table-xs w-full">
         <thead>
-          <tr className="text-xs uppercase tracking-wider text-base-content/40">
+          <tr className="text-xs uppercase tracking-wider text-[#F0F4FF]/40">
             <th className="font-semibold">Date</th>
             <th className="font-semibold">Description</th>
             <th className="font-semibold">Method</th>
@@ -44,8 +44,8 @@ export default function PaymentLedger({ payments = [], onDelete, runningBalance 
         </thead>
         <tbody>
           {displayed.map(p => (
-            <tr key={p._id} className="hover:bg-base-200 transition-colors group">
-              <td className="font-mono text-xs text-base-content/60 whitespace-nowrap">
+            <tr key={p._id} className="hover:bg-[#070D19] transition-colors group">
+              <td className="font-mono text-xs text-[#F0F4FF]/60 whitespace-nowrap">
                 {formatDate(p.paymentDate)}
               </td>
               <td>
@@ -54,10 +54,10 @@ export default function PaymentLedger({ payments = [], onDelete, runningBalance 
                     {p.paymentType?.replace(/_/g, ' ')}
                   </span>
                   {p.billingPeriodLabel && (
-                    <span className="text-xs text-base-content/40 ml-1">· {p.billingPeriodLabel}</span>
+                    <span className="text-xs text-[#F0F4FF]/40 ml-1">· {p.billingPeriodLabel}</span>
                   )}
                   {p.notes && (
-                    <p className="text-xs text-base-content/30 mt-0.5 truncate max-w-[180px]">{p.notes}</p>
+                    <p className="text-xs text-[#F0F4FF]/30 mt-0.5 truncate max-w-[180px]">{p.notes}</p>
                   )}
                 </div>
               </td>
@@ -66,9 +66,9 @@ export default function PaymentLedger({ payments = [], onDelete, runningBalance 
                   {METHOD_ICONS[p.paymentMethod] || '💳'}
                 </span>
               </td>
-              <td className="text-xs text-base-content/60">{p.paidBy || '—'}</td>
+              <td className="text-xs text-[#F0F4FF]/60">{p.paidBy || '—'}</td>
               <td className={`text-right font-mono font-semibold text-xs whitespace-nowrap
-                ${p.amount < 0 ? 'text-warning' : p.amount > 0 ? 'text-success' : 'text-base-content/40'}
+                ${p.amount < 0 ? 'text-warning' : p.amount > 0 ? 'text-success' : 'text-[#F0F4FF]/40'}
               `}>
                 {p.amount < 0 ? '−' : '+'}{formatKES(Math.abs(p.amount))}
               </td>
@@ -77,7 +77,7 @@ export default function PaymentLedger({ payments = [], onDelete, runningBalance 
               `}>
                 {formatKES(p.runningTotal)}
               </td>
-              <td className="font-mono text-xs text-base-content/30 max-w-[80px] truncate">
+              <td className="font-mono text-xs text-[#F0F4FF]/30 max-w-[80px] truncate">
                 {p.reference || '—'}
               </td>
               {onDelete && (
@@ -96,7 +96,7 @@ export default function PaymentLedger({ payments = [], onDelete, runningBalance 
         </tbody>
         <tfoot>
           <tr className="border-t-2 border-base-300 font-semibold">
-            <td colSpan={4} className="text-xs text-base-content/50 pt-2">Total Paid</td>
+            <td colSpan={4} className="text-xs text-[#F0F4FF]/50 pt-2">Total Paid</td>
             <td className="text-right font-mono text-sm text-success pt-2">
               {formatKES(payments.filter(p => p.amount > 0).reduce((s, p) => s + p.amount, 0))}
             </td>

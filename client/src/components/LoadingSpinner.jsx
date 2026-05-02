@@ -10,7 +10,7 @@ const LoadingSpinner = ({ size = 'md', message = 'Loading...' }) => {
   return (
     <div className="flex flex-col items-center justify-center p-4">
       <span className={`loading loading-spinner ${sizeClasses[size]} text-primary`}></span>
-      {message && <p className="mt-2 text-sm text-base-content/70">{message}</p>}
+      {message && <p className="mt-2 text-sm text-[#F0F4FF]/70">{message}</p>}
     </div>
   );
 };
