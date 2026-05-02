@@ -57,20 +57,20 @@ export default function Dashboard() {
   const totalAlerts = (stats?.alerts?.critical || 0) + (stats?.alerts?.warning || 0) + (stats?.alerts?.info || 0)
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       {loading ? (
         <DashboardSkeleton />
       ) : (
         <>
-          {/* Stat Cards Row */}
-          <div className="grid grid-cols-4 gap-6 mb-8">
+           {/* Stat Cards Row */}
+           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
             {/* Active Clients */}
             <div className="card-premium p-6 relative overflow-hidden hover:-translate-y-0.5 transition-transform duration-200">
               <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full opacity-5 bg-[#06B6D4]"></div>
               <div className="flex items-start justify-between relative">
                 <div>
                   <p className="text-[#6B7FA3] text-xs font-medium tracking-widest uppercase mb-3">Active Clients</p>
-                  <p className="text-[#F0F4FF] text-3xl font-bold font-['DM_Serif_Display'] tracking-tight">{stats?.clients?.active ?? 0}</p>
+                   <p className="text-[#F0F4FF] text-2xl lg:text-3xl font-bold font-['DM_Serif_Display'] tracking-tight">{stats?.clients?.active ?? 0}</p>
                   <p className="text-[#3D4F6B] text-xs mt-1.5">{stats?.clients?.total ?? 0} total clients</p>
                 </div>
                 <div className="w-10 h-10 rounded-[10px] flex items-center justify-center bg-[rgba(6,182,212,0.1)] text-[#06B6D4]">
@@ -91,7 +91,7 @@ export default function Dashboard() {
               <div className="flex items-start justify-between relative">
                 <div>
                   <p className="text-[#6B7FA3] text-xs font-medium tracking-widest uppercase mb-3">Monthly Revenue</p>
-                  <p className="text-[#F0F4FF] text-3xl font-bold font-['DM_Serif_Display'] tracking-tight">KES {new Intl.NumberFormat().format(stats?.revenue?.thisMonth || 0)}</p>
+                   <p className="text-[#F0F4FF] text-2xl lg:text-3xl font-bold font-['DM_Serif_Display'] tracking-tight">KES {new Intl.NumberFormat().format(stats?.revenue?.thisMonth || 0)}</p>
                   <p className="text-[#3D4F6B] text-xs mt-1.5">KES {new Intl.NumberFormat().format(stats?.revenue?.total || 0)} all time</p>
                 </div>
                 <div className="w-10 h-10 rounded-[10px] flex items-center justify-center bg-[rgba(245,158,11,0.1)] text-[#F59E0B]">
@@ -112,7 +112,7 @@ export default function Dashboard() {
               <div className="flex items-start justify-between relative">
                 <div>
                   <p className="text-[#6B7FA3] text-xs font-medium tracking-widest uppercase mb-3">Outstanding Debt</p>
-                  <p className="text-[#F0F4FF] text-3xl font-bold font-['DM_Serif_Display'] tracking-tight">KES {new Intl.NumberFormat().format(stats?.outstanding?.total || 0)}</p>
+                   <p className="text-[#F0F4FF] text-2xl lg:text-3xl font-bold font-['DM_Serif_Display'] tracking-tight">KES {new Intl.NumberFormat().format(stats?.outstanding?.total || 0)}</p>
                   <p className="text-[#3D4F6B] text-xs mt-1.5">{(stats?.outstanding?.clients || []).length} clients overdue</p>
                 </div>
                 <div className="w-10 h-10 rounded-[10px] flex items-center justify-center bg-[rgba(239,68,68,0.1)] text-[#EF4444]">
@@ -130,7 +130,7 @@ export default function Dashboard() {
               <div className="flex items-start justify-between relative">
                 <div>
                   <p className="text-[#6B7FA3] text-xs font-medium tracking-widest uppercase mb-3">Active Alerts</p>
-                  <p className="text-[#F0F4FF] text-3xl font-bold font-['DM_Serif_Display'] tracking-tight">{totalAlerts}</p>
+                   <p className="text-[#F0F4FF] text-2xl lg:text-3xl font-bold font-['DM_Serif_Display'] tracking-tight">{totalAlerts}</p>
                   <p className="text-[#3D4F6B] text-xs mt-1.5">{stats?.alerts?.critical || 0} critical</p>
                 </div>
                 <div className="w-10 h-10 rounded-[10px] flex items-center justify-center bg-[rgba(245,158,11,0.1)] text-[#F59E0B]">
@@ -143,10 +143,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Charts Row */}
-          <div className="grid grid-cols-12 gap-6 mb-8">
-            {/* Revenue Chart */}
-            <div className="card-premium p-6 col-span-8">
+           {/* Charts Row */}
+           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 mb-8">
+             {/* Revenue Chart */}
+             <div className="card-premium p-6 col-span-1 lg:col-span-8">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-[#F0F4FF] font-semibold text-base">Revenue Trend (6 months)</h3>
                 <span className="text-[#06B6D4] bg-[rgba(6,182,212,0.08)] text-xs px-3 py-1 rounded-full">Last 6 months</span>
@@ -178,8 +178,8 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* Recent Alerts */}
-            <div className="card-premium p-6 col-span-4">
+             {/* Recent Alerts */}
+             <div className="card-premium p-6 col-span-1 lg:col-span-4 mt-4 lg:mt-0">
               <h3 className="text-[#F0F4FF] font-semibold text-base mb-5">Recent Alerts</h3>
               <div className="space-y-1">
                 {alerts.length > 0 ? (
@@ -201,10 +201,10 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Bottom Row */}
-          <div className="grid grid-cols-12 gap-6">
-            {/* Top Debtors */}
-            <div className="card-premium p-6 col-span-5">
+           {/* Bottom Row */}
+           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+             {/* Top Debtors */}
+             <div className="card-premium p-6 col-span-1 lg:col-span-5">
               <h3 className="text-[#F0F4FF] font-semibold text-base mb-5">Most Overdue Clients</h3>
               {(stats?.outstanding?.clients || []).length > 0 ? (
                 <div className="space-y-1">
@@ -224,8 +224,8 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* Recent Payments Table */}
-            <div className="card-premium p-6 col-span-7">
+             {/* Recent Payments Table */}
+             <div className="card-premium p-6 col-span-1 lg:col-span-7 mt-4 lg:mt-0">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="text-[#F0F4FF] font-semibold text-base">Recent Payments</h3>
                 <button onClick={() => navigate('/payments')} className="text-[#06B6D4] text-xs hover:underline">View all</button>

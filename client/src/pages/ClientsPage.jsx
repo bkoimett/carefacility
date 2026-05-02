@@ -50,9 +50,9 @@ export default function ClientsPage() {
   if (error) return <ErrorState message={error} onRetry={refetch} />
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Page Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 lg:mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-[#F0F4FF]">Clients</h1>
           <p className="text-[#3D4F6B] text-sm mt-1">
@@ -60,7 +60,7 @@ export default function ClientsPage() {
           </p>
         </div>
         <button
-          className="btn-premium flex items-center gap-2"
+          className="btn-premium flex items-center gap-2 w-full sm:w-auto"
           onClick={() => document.getElementById('client-modal').showModal()}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -71,9 +71,9 @@ export default function ClientsPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
         {/* Search Input */}
-        <div className="relative flex-1 max-w-xs">
+        <div className="relative flex-1 w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#3D4F6B] w-4 h-4" />
           <input
             type="text"
@@ -85,7 +85,7 @@ export default function ClientsPage() {
         </div>
 
         {/* Status Filter Tabs */}
-        <div className="flex items-center bg-[#0B1426] border border-[#1A263D] rounded-[8px] p-1 ml-auto">
+        <div className="flex items-center bg-[#0B1426] border border-[#1A263D] rounded-[8px] p-1 flex-wrap">
           {[
             { key: 'active', label: 'Active', count: data?.counts?.active ?? 0 },
             { key: 'discharged', label: 'Discharged', count: data?.counts?.discharged ?? 0 },
@@ -95,8 +95,7 @@ export default function ClientsPage() {
               key={tab.key}
               className={`px-4 py-1.5 text-sm rounded-[6px] transition-all duration-150 ${statusFilter === tab.key
                 ? 'bg-[#1A263D] text-[#F0F4FF] font-medium'
-                : 'text-[#6B7FA3]'}
-              `}
+                : 'text-[#6B7FA3]'}`}
               onClick={() => { setStatusFilter(tab.key); setPage(1) }}
             >
               {tab.label}
@@ -110,8 +109,8 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="card-premium overflow-hidden">
+      {/* Table - Desktop */}
+      <div className="hidden sm:block card-premium overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -232,10 +231,88 @@ export default function ClientsPage() {
         </div>
       </div>
 
+      {/* Mobile Card List */}
+      <div className="sm:hidden space-y-3">
+        {loading ? (
+          <TableSkeleton />
+        ) : filteredClients.length === 0 && !loading ? (
+          <EmptyState
+            icon="👤"
+            title="No clients found"
+            message={searchQuery ? "No clients match your search" : "Add your first client to get started"}
+            action={
+              <button className="btn btn-primary btn-sm"
+                onClick={() => document.getElementById('client-modal').showModal()}>
+                Add Client
+              </button>
+            }
+          />
+        ) : (
+          filteredClients.map(client => {
+            const phaseInfo = getPhaseLabel(client.billing?.phase)
+            const initials = client.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+            return (
+              <div key={client._id} className="card-premium p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1A263D] to-[#070D19] ring-1 ring-[#1A263D] flex items-center justify-center text-[#06B6D4] text-xs font-bold flex-shrink-0">
+                      {initials}
+                    </div>
+                    <div>
+                      <p className="text-[#F0F4FF] text-sm font-medium">{client.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <BalanceDisplay balance={client.billing?.balance} />
+                    <span className={`badge badge-xs ${
+                      phaseInfo.color.includes('text-success') ? 'badge-positive' :
+                      phaseInfo.color.includes('text-error') ? 'badge-negative' :
+                      phaseInfo.color.includes('text-warning') ? 'badge-warning' : 'badge-cyan'
+                    }`}>
+                      {phaseInfo.label}
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-[#1A263D] grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-[#3D4F6B] text-xs">Sponsor</p>
+                    <p className="text-[#6B7FA3] text-sm">{client.sponsor?.name || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[#3D4F6B] text-xs">Admitted</p>
+                    <p className="text-[#6B7FA3] text-sm font-mono">{formatDate(client.dateOfAdmission)}</p>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 mt-3">
+                  <button
+                    className="text-[#06B6D4] bg-[rgba(6,182,212,0.08)] text-xs px-3 py-1.5 rounded-[6px]"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/clients/${client._id}`);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="text-[#6B7FA3] bg-[#1A263D] text-xs px-3 py-1.5 rounded-[6px] hover:bg-[#1A263D]/80"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/clients/${client._id}`);
+                    }}
+                  >
+                    View
+                  </button>
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+
       {/* Pagination */}
       {pagination && pagination.total > 0 && (
-        <div className="flex items-center justify-between px-6 py-4 border-t border-[#1A263D] mt-4">
-          <span className="text-[#3D4F6B] text-xs">
+        <div className="flex flex-col sm:flex-row items-center gap-3 px-4 sm:px-6 py-4 border-t border-[#1A263D] mt-4">
+          <span className="text-[#3D4F6B] text-xs hidden sm:block">
             Showing {filteredClients.length} of {pagination.total} clients
           </span>
           <div className="flex gap-1">
