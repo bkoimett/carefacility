@@ -14,7 +14,7 @@ const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/clients', label: 'Clients', icon: Users },
   { to: '/sponsors', label: 'Sponsors', icon: Building2 },
-  { to: '/payments', label: 'Payments', icon: CreditCard },
+  // { to: '/payments', label: 'Payments', icon: CreditCard },
   { to: '/alerts', label: 'Alerts', icon: Bell },
 ]
 
@@ -49,7 +49,7 @@ export default function Layout() {
               <span className="text-white font-bold text-sm">S</span>
             </div>
             <div>
-              <h1 className="text-[#F0F4FF] font-semibold text-base">Serenity</h1>
+              <h1 className="text-[#F0F4FF] font-semibold text-base">TSP</h1>
               <p className="text-[#3D4F6B] text-xs tracking-widest uppercase mt-0.5">Billing Suite</p>
             </div>
           </div>
