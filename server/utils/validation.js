@@ -24,19 +24,22 @@ const validateClient = [
     .withMessage('Name must be at least 2 characters')
     .escape(),
   body('email')
+    .optional()
     .isEmail()
-    .withMessage('Valid email is required')
+    .withMessage('Valid email format required if provided')
     .normalizeEmail(),
   body('phone')
     .optional()
     .isMobilePhone()
     .withMessage('Valid phone number is required if provided'),
-  body('feeStructure')
-    .isIn(['monthly', 'daily', 'hourly'])
-    .withMessage('Fee structure must be one of: monthly, daily, hourly'),
-  body('rate')
+  body('monthlyFee')
+    .optional()
     .isFloat({ min: 0 })
-    .withMessage('Rate must be a positive number'),
+    .withMessage('Monthly fee must be a non-negative number'),
+  body('medicalFee')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('Medical fee must be a non-negative number'),
   handleValidationErrors
 ];
 

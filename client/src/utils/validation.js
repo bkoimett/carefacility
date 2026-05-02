@@ -32,15 +32,14 @@ export const validateClient = (data) => {
     }
   }
 
-  // Fee structure validation
-  const validFeeStructures = ['monthly', 'daily', 'hourly'];
-  if (!data.feeStructure || !validFeeStructures.includes(data.feeStructure)) {
-    errors.feeStructure = 'Fee structure must be monthly, daily, or hourly';
+  // Monthly fee validation (optional, but must be >= 0 if provided)
+  if (data.monthlyFee !== undefined && data.monthlyFee !== '' && parseFloat(data.monthlyFee) < 0) {
+    errors.monthlyFee = 'Monthly fee cannot be negative';
   }
 
-  // Rate validation
-  if (!data.rate || parseFloat(data.rate) <= 0) {
-    errors.rate = 'Rate must be greater than 0';
+  // Medical fee validation (optional, but must be >= 0 if provided)
+  if (data.medicalFee !== undefined && data.medicalFee !== '' && parseFloat(data.medicalFee) < 0) {
+    errors.medicalFee = 'Medical fee cannot be negative';
   }
 
   return {

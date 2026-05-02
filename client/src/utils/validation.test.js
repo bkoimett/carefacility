@@ -7,8 +7,7 @@ describe('validateClient', () => {
       name: 'John Doe',
       email: 'john@example.com',
       phone: '+1234567890',
-      feeStructure: 'monthly',
-      rate: 100
+      monthlyFee: 5000
     };
     
     const result = validateClient(data);
@@ -20,8 +19,7 @@ describe('validateClient', () => {
     const data = {
       name: '',
       email: 'john@example.com',
-      feeStructure: 'monthly',
-      rate: 100
+      monthlyFee: 5000
     };
     
     const result = validateClient(data);
@@ -33,8 +31,7 @@ describe('validateClient', () => {
     const data = {
       name: 'John Doe',
       email: 'invalid-email',
-      feeStructure: 'monthly',
-      rate: 100
+      monthlyFee: 5000
     };
     
     const result = validateClient(data);
@@ -42,30 +39,27 @@ describe('validateClient', () => {
     expect(result.errors.email).toBe('Invalid email format');
   });
 
-  it('should invalidate client with invalid fee structure', () => {
+  it('should invalidate client with negative monthly fee', () => {
     const data = {
       name: 'John Doe',
       email: 'john@example.com',
-      feeStructure: 'weekly',
-      rate: 100
+      monthlyFee: -100
     };
     
     const result = validateClient(data);
     expect(result.isValid).toBe(false);
-    expect(result.errors.feeStructure).toBe('Fee structure must be monthly, daily, or hourly');
+    expect(result.errors.monthlyFee).toBe('Monthly fee cannot be negative');
   });
 
-  it('should invalidate client with rate <= 0', () => {
+  it('should invalidate client with negative medical fee', () => {
     const data = {
       name: 'John Doe',
-      email: 'john@example.com',
-      feeStructure: 'monthly',
-      rate: 0
+      medicalFee: -50
     };
     
     const result = validateClient(data);
     expect(result.isValid).toBe(false);
-    expect(result.errors.rate).toBe('Rate must be greater than 0');
+    expect(result.errors.medicalFee).toBe('Medical fee cannot be negative');
   });
 });
 
