@@ -1,178 +1,183 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { dashboardApi, paymentsApi } from '../utils/api'
-import { formatKES, formatDate } from '../utils/formatters'
-import { Modal } from './ui'
-import { showError } from './ToastNotifications'
+import React, { useState, useEffect } from 'react';
+import { X, TrendingUp, Calendar, CreditCard } from 'lucide-react';
+import { dashboardApi } from '../utils/api';
+import { showError } from './ToastNotifications';
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-export function RevenueDetails({ isOpen, onClose }) {
-  const navigate = useNavigate()
-  const [data, setData] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [expandedMonth, setExpandedMonth] = useState(null)
-  const [totalRevenue, setTotalRevenue] = useState(0)
-  const [totalPayments, setTotalPayments] = useState(0)
+const RevenueDetails = ({ isOpen, onClose }) => {
+  const [loading, setLoading] = useState(true);
+  const [monthlyData, setMonthlyData] = useState([]);
+  const [expandedMonths, setExpandedMonths] = useState({});
 
   useEffect(() => {
     if (isOpen) {
-      loadData()
+      fetchMonthlySummary();
     }
-  }, [isOpen])
+  }, [isOpen]);
 
-  const loadData = async () => {
+  const fetchMonthlySummary = async () => {
+    setLoading(true);
     try {
-      setLoading(true)
-      const response = await dashboardApi.getPaymentsMonthlySummary()
-      setData(response.data || [])
-
-      // Calculate totals
-      const totalRev = response.data.reduce((sum, m) => sum + (m.total || 0), 0)
-      const totalPmts = response.data.reduce((sum, m) => sum + (m.count || 0), 0)
-      setTotalRevenue(totalRev)
-      setTotalPayments(totalPmts)
-    } catch (err) {
-      showError(err.message || 'Failed to load revenue data')
+      const response = await dashboardApi.getPaymentsMonthlySummary();
+      // Response is: { data: [...] } or just []
+      const rawData = response?.data || response || [];
+      const data = Array.isArray(rawData) ? rawData : (rawData.data || rawData.payments || rawData.monthly || []);
+      
+      // Transform data to expected format
+      const formattedData = data.map(item => ({
+        month: item._id ? `${MONTHS[item._id.month - 1]} ${item._id.year}` : 'Unknown',
+        total: item.total || 0,
+        count: item.count || 0,
+        payments: (item.payments || []).map(payment => ({
+          clientName: payment.client?.name || payment.clientName || 'Unknown Client',
+          amount: payment.amount || 0,
+          date: payment.paymentDate || payment.date,
+          method: payment.paymentMethod || payment.method || 'N/A',
+          paymentType: payment.paymentType || 'payment'
+        }))
+      }));
+      
+      setMonthlyData(formattedData);
+    } catch (error) {
+      console.error('Failed to load revenue data:', error);
+      showError('Failed to load revenue data');
+      setMonthlyData([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const toggleMonth = (index) => {
-    setExpandedMonth(expandedMonth === index ? null : index)
-  }
+    setExpandedMonths(prev => ({ ...prev, [index]: !prev[index] }));
+  };
 
-  if (!isOpen) return null
+  const totalRevenue = monthlyData.reduce((sum, month) => sum + (month.total || 0), 0);
+
+  if (!isOpen) return null;
 
   return (
-    <Modal id="revenue-details" isOpen={isOpen} onClose={onClose} size="max-w-3xl">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-display text-xl">Revenue Details</h3>
-        <button
-          className="btn btn-sm btn-circle btn-ghost absolute right-3 top-3"
-          onClick={onClose}
-        >
-          ✕
-        </button>
-      </div>
-
-      {/* Total summary */}
-      <div className="bg-base-200 rounded-xl p-4 mb-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Total Revenue</p>
-            <p className="text-2xl font-display font-semibold text-success">
-              {formatKES(totalRevenue)}
-            </p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="bg-[#0B1426] rounded-2xl border border-[#1A263D] w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-[0_8px_32px_-8px_rgba(2,4,12,0.6),_0_0_0_1px_rgba(26,38,61,0.8)]">
+        <div className="flex items-center justify-between p-6 border-b border-[#1A263D]">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-[rgba(245,158,11,0.1)]">
+              <TrendingUp className="w-5 h-5 text-[#F59E0B]" />
+            </div>
+            <h2 className="text-xl font-semibold text-[#F0F4FF]">Revenue Details</h2>
           </div>
-          <div>
-            <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Total Payments</p>
-            <p className="text-2xl font-display font-semibold text-primary">
-              {totalPayments}
-            </p>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-[#1A263D] transition-colors"
+          >
+            <X className="w-5 h-5 text-[#6B7FA3]" />
+          </button>
+        </div>
+
+        <div className="p-6 border-b border-[#1A263D] bg-[#070D19]/30">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-[#6B7FA3]">Total Revenue (All Time)</p>
+              <p className="text-3xl font-bold text-[#F59E0B] mt-1">
+                KES {totalRevenue.toLocaleString()}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-[#6B7FA3]">Total Transactions</p>
+              <p className="text-2xl font-semibold text-[#F0F4FF] mt-1">
+                {monthlyData.reduce((sum, m) => sum + (m.count || 0), 0)}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {loading ? (
-        <div className="space-y-3">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-base-200 rounded-xl h-20 shimmer animate-shimmer"></div>
-          ))}
-        </div>
-      ) : data.length === 0 ? (
-        <div className="text-center py-8 text-base-content/30">
-          No payment data available
-        </div>
-      ) : (
-        <div className="space-y-3 max-h-[60vh] overflow-y-auto">
-          {data.map((month, idx) => {
-            const monthName = `${MONTHS[month._id.month - 1]} ${month._id.year}`
-            const isExpanded = expandedMonth === idx
-
-            return (
-              <div key={idx} className="border border-base-300 rounded-xl overflow-hidden">
-                {/* Month header */}
+        <div className="overflow-y-auto max-h-[calc(85vh-180px)] p-6 space-y-4">
+          {loading ? (
+            Array(6).fill(0).map((_, i) => (
+              <div key={i} className="bg-[#070D19]/50 rounded-xl p-4 animate-pulse">
+                <div className="h-6 bg-[#1A263D] rounded w-48 mb-3"></div>
+                <div className="h-4 bg-[#1A263D] rounded w-32"></div>
+              </div>
+            ))
+          ) : monthlyData.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-[#6B7FA3]">No payment data available</p>
+            </div>
+          ) : (
+            monthlyData.map((month, idx) => (
+              <div key={idx} className="bg-[#070D19]/30 rounded-xl border border-[#1A263D] overflow-hidden">
                 <button
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-base-200 transition-colors"
                   onClick={() => toggleMonth(idx)}
+                  className="w-full flex items-center justify-between p-4 hover:bg-[#1A263D]/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="font-display font-semibold">{monthName}</span>
-                    <span className="badge badge-primary">{formatKES(month.total)}</span>
-                    <span className="text-xs text-base-content/40">{month.count} payments</span>
+                    <Calendar className="w-5 h-5 text-[#06B6D4]" />
+                    <span className="font-semibold text-[#F0F4FF]">{month.month}</span>
                   </div>
-                  <span className="text-lg transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}">
-                    ▼
-                  </span>
+                  <div className="flex items-center gap-6">
+                    <span className="text-[#F59E0B] font-semibold">
+                      KES {month.total?.toLocaleString()}
+                    </span>
+                    <span className="text-sm text-[#6B7FA3]">
+                      {month.count} payment{month.count !== 1 ? 's' : ''}
+                    </span>
+                    <svg className={`w-5 h-5 text-[#6B7FA3] transition-transform ${expandedMonths[idx] ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
                 </button>
-
-                {/* Expanded payments */}
-                {isExpanded && (
-                  <div className="border-t border-base-300 bg-base-100/50">
-                    <div className="overflow-x-auto">
-                      <table className="table table-sm w-full">
-                        <thead>
-                          <tr className="text-xs uppercase tracking-wider text-base-content/50">
-                            <th className="font-semibold">Client</th>
-                            <th className="font-semibold">Amount</th>
-                            <th className="font-semibold">Date</th>
-                            <th className="font-semibold">Method</th>
-                            <th className="font-semibold">Type</th>
+                
+                {expandedMonths[idx] && (
+                  <div className="border-t border-[#1A263D]">
+                    <table className="w-full text-left">
+                      <thead className="bg-[#0B1426]/50">
+                        <tr>
+                          <th className="p-3 text-xs font-medium text-[#6B7FA3]">Client</th>
+                          <th className="p-3 text-xs font-medium text-[#6B7FA3]">Amount</th>
+                          <th className="p-3 text-xs font-medium text-[#6B7FA3]">Date</th>
+                          <th className="p-3 text-xs font-medium text-[#6B7FA3]">Method</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {month.payments?.map((payment, pIdx) => (
+                          <tr key={pIdx} className="border-b border-[#1A263D] last:border-0 hover:bg-[#1A263D]/30">
+                            <td className="p-3 text-sm text-[#F0F4FF]">
+                              {payment.clientName || 'Unknown'}
+                            </td>
+                            <td className="p-3 text-sm text-[#F59E0B] font-medium">
+                              KES {payment.amount?.toLocaleString()}
+                            </td>
+                            <td className="p-3 text-sm text-[#6B7FA3]">
+                              {new Date(payment.date).toLocaleDateString()}
+                            </td>
+                            <td className="p-3 text-sm text-[#6B7FA3]">
+                              <span className="flex items-center gap-1">
+                                <CreditCard className="w-3 h-3" />
+                                {payment.method || 'N/A'}
+                              </span>
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {month.payments && month.payments.length > 0 ? (
-                            month.payments.map((p) => (
-                              <tr
-                                key={p._id}
-                                className="table-row-hover cursor-pointer"
-                                onClick={() => {
-                                  if (p.client) {
-                                    navigate(`/clients/${p.client._id}`)
-                                    onClose()
-                                  }
-                                }}
-                              >
-                                <td className="font-medium">
-                                  {p.client ? p.client.name : '—'}
-                                </td>
-                                <td className="font-mono text-success font-semibold">
-                                  {formatKES(p.amount)}
-                                </td>
-                                <td className="text-xs font-mono text-base-content/60">
-                                  {formatDate(p.paymentDate)}
-                                </td>
-                                <td>
-                                  <span className="badge badge-ghost badge-xs capitalize">
-                                    {p.paymentMethod?.replace(/_/g, ' ') || '—'}
-                                  </span>
-                                </td>
-                                <td>
-                                  <span className="badge badge-ghost badge-xs capitalize">
-                                    {p.paymentType?.replace(/_/g, ' ') || '—'}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))
-                          ) : (
-                            <tr>
-                              <td colSpan="5" className="text-center py-4 text-base-content/30">
-                                No payments
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </div>
-            )
-          })}
+            ))
+          )}
         </div>
-      )}
-    </Modal>
-  )
-}
+
+        <div className="p-6 border-t border-[#1A263D] flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-6 py-2 rounded-lg bg-[#1A263D] text-[#F0F4FF] hover:bg-[#1A263D]/70 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RevenueDetails;

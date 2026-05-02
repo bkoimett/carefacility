@@ -8,8 +8,8 @@ import { dashboardApi, alertsApi } from '../utils/api'
 import { formatKES, formatDate, getAlertTypeIcon, timeAgo } from '../utils/formatters'
 import { StatCard, Spinner, ErrorState, PageHeader } from '../components/ui'
 import { DashboardSkeleton } from '../components/SkeletonLoader'
-import { RevenueDetails } from '../components/RevenueDetails'
-import { DebtDetails } from '../components/DebtDetails'
+import RevenueDetails from '../components/RevenueDetails'
+import DebtDetails from '../components/DebtDetails'
 import { Users, TrendingUp, AlertTriangle, Bell } from 'lucide-react'
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -83,7 +83,10 @@ export default function Dashboard() {
             </div>
 
             {/* Monthly Revenue */}
-            <div className="card-premium p-6 relative overflow-hidden hover:-translate-y-0.5 transition-transform duration-200">
+            <div
+              className="card-premium p-6 relative overflow-hidden hover:-translate-y-0.5 transition-transform duration-200 cursor-pointer"
+              onClick={() => setRevenueModalOpen(true)}
+            >
               <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full opacity-5 bg-[#F59E0B]"></div>
               <div className="flex items-start justify-between relative">
                 <div>
@@ -101,7 +104,10 @@ export default function Dashboard() {
             </div>
 
             {/* Outstanding Debt */}
-            <div className="card-premium p-6 relative overflow-hidden hover:-translate-y-0.5 transition-transform duration-200">
+            <div
+              className="card-premium p-6 relative overflow-hidden hover:-translate-y-0.5 transition-transform duration-200 cursor-pointer"
+              onClick={() => setDebtModalOpen(true)}
+            >
               <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full opacity-5 bg-[#EF4444]"></div>
               <div className="flex items-start justify-between relative">
                 <div>
