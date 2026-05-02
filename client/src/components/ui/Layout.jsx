@@ -200,7 +200,7 @@ export default function Layout() {
             </button>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-[#F0F4FF] text-sm font-medium tracking-wide">TSP · Billing Suite</h2>
+                <h2 className="text-[#F0F4FF] text-sm font-medium tracking-wide lg:hidden">TSP · Billing Suite</h2>
               </div>
             </div>
           </div>
