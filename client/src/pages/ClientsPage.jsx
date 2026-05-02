@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clientsApi } from '../utils/api'
 import { useFetch, useAsync } from '../hooks/useFetch'
@@ -10,19 +10,17 @@ import { showError, showSuccess } from '../components/ToastNotifications'
 
 export default function ClientsPage() {
   const navigate = useNavigate()
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('active')
   const [page, setPage] = useState(1)
 
-  const params = { search, status: statusFilter, page, limit: 20 }
   const { data, loading, error, refetch } = useFetch(
-    () => clientsApi.getAll(params),
-    [search, statusFilter, page]
+    () => clientsApi.getClientsByStatus(statusFilter),
+    [statusFilter]
   )
   const { run, loading: submitting } = useAsync()
 
-  const clients = data?.data || data || []
-  const pagination = data?.pagination
+  const clients = data?.clients || []
+  const pagination = { total: clients.length }
 
 const handleCreate = async (formData) => {
       try {
@@ -47,7 +45,7 @@ const handleCreate = async (formData) => {
     <div className="space-y-5">
       <PageHeader
         title="Clients"
-        subtitle={`${pagination?.total ?? 0} total clients`}
+        subtitle={`${data?.counts?.active ?? 0} active`}
         actions={
           <button className="btn btn-primary btn-sm gap-1" onClick={() => document.getElementById('client-modal').showModal()}>
             <span>+</span> Add Client
@@ -57,21 +55,18 @@ const handleCreate = async (formData) => {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <input
-          type="search"
-          placeholder="Search by name..."
-          className="input input-bordered input-sm flex-1 max-w-xs"
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1) }}
-        />
         <div className="tabs tabs-boxed bg-base-200 self-start">
-          {['all', 'active', 'discharged', 'absconded'].map(s => (
+          {[
+            { key: 'active', label: 'Active', count: data?.counts?.active ?? 0 },
+            { key: 'discharged', label: 'Discharged', count: data?.counts?.discharged ?? 0 },
+            { key: 'all', label: 'All', count: data?.counts?.all ?? 0 }
+          ].map(tab => (
             <button
-              key={s}
-              className={`tab tab-sm capitalize ${statusFilter === s ? 'tab-active' : ''}`}
-              onClick={() => { setStatusFilter(s); setPage(1) }}
+              key={tab.key}
+              className={`tab tab-sm ${statusFilter === tab.key ? 'tab-active' : ''}`}
+              onClick={() => { setStatusFilter(tab.key); setPage(1) }}
             >
-              {s}
+              {tab.label} ({tab.count})
             </button>
           ))}
         </div>
@@ -102,14 +97,12 @@ const handleCreate = async (formData) => {
                       <EmptyState
                         icon="👤"
                         title="No clients found"
-                        message={search ? 'Try a different search term' : 'Add your first client to get started'}
+                        message="Add your first client to get started"
                         action={
-                          !search && (
-                            <button className="btn btn-primary btn-sm"
-                              onClick={() => document.getElementById('client-modal').showModal()}>
-                              Add Client
-                            </button>
-                          )
+                          <button className="btn btn-primary btn-sm"
+                            onClick={() => document.getElementById('client-modal').showModal()}>
+                            Add Client
+                          </button>
                         }
                       />
                     </td>

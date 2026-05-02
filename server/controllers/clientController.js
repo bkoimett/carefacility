@@ -178,3 +178,41 @@ exports.getClientBilling = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+// GET /api/clients/filter/:status
+exports.getClientsByStatus = async (req, res) => {
+  try {
+    const { status } = req.params;
+    const filter = status === 'all' ? {} : { status };
+
+    const activeCount = await Client.countDocuments({ status: 'active' });
+    const dischargedCount = await Client.countDocuments({ status: 'discharged' });
+    const totalCount = await Client.countDocuments();
+
+    const clients = await Client.find(filter)
+      .populate('sponsor', 'name phone email relationship');
+
+    const enriched = await Promise.all(clients.map(async (c) => {
+      const payments = await Payment.find({ client: c._id });
+      const billing = computeBillingState(c.toObject(), payments);
+      return {
+        ...c.toObject(),
+        billing: {
+          totalCharged: billing.totalCharged,
+          totalPaid: billing.totalPaid,
+          balance: billing.balance,
+          phase: billing.phase,
+          daysPostExpiry: billing.daysPostExpiry,
+          expiryDate: billing.expiryDate
+        }
+      };
+    }));
+
+    res.json({
+      clients: enriched,
+      counts: { active: activeCount, discharged: dischargedCount, all: totalCount }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};

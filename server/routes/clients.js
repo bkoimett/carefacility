@@ -4,6 +4,7 @@ const ctrl = require('../controllers/clientController');
 const { validateClient } = require('../utils/validation');
 
 router.get('/', ctrl.getAllClients);
+router.get('/filter/:status', ctrl.getClientsByStatus);
 router.get('/:id', ctrl.getClientById);
 router.post('/', validateClient, ctrl.createClient);
 router.put('/:id', validateClient, ctrl.updateClient);
