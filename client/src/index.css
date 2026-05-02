@@ -2,6 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background-color: #070D19;
+  color: #6B7FA3;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Premium scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #070D19; }
+::-webkit-scrollbar-thumb { background: #1A263D; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #06B6D4; }
+
+/* Noise texture overlay for premium depth */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+/* Premium card base */
+.card-premium {
+  background: #0B1426;
+  border: 1px solid #1A263D;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px -8px rgba(2,4,12,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* Premium button */
+.btn-premium {
+  background: #06B6D4;
+  color: white;
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.01em;
+}
+.btn-premium:hover {
+  background: #0891B2;
+  box-shadow: 0 0 20px rgba(6,182,212,0.3);
+  transform: translateY(-1px);
+}
+
+/* Status badges */
+.badge-positive { background: rgba(16,185,129,0.1); color: #10B981; font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.05em; text-transform: uppercase; }
+.badge-negative { background: rgba(239,68,68,0.1); color: #EF4444; font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.05em; text-transform: uppercase; }
+.badge-warning { background: rgba(245,158,11,0.1); color: #F59E0B; font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.05em; text-transform: uppercase; }
+.badge-cyan { background: rgba(6,182,212,0.1); color: #06B6D4; font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.05em; text-transform: uppercase; }
+
 @layer base {
   html {
     font-family: 'DM Sans', system-ui, sans-serif;
@@ -19,11 +78,11 @@
 
 @layer components {
   .stat-card {
-    @apply bg-base-100 rounded-2xl shadow-sm border border-base-300 p-5 transition-all hover:shadow-md;
+    @apply bg-premium-card rounded-premium border border-premium-border p-5 transition-all hover:bg-premium-card-hover;
   }
 
   .table-row-hover {
-    @apply hover:bg-base-200 transition-colors cursor-pointer;
+    @apply hover:bg-premium-card-hover transition-colors cursor-pointer;
   }
 
   .badge-phase {
@@ -31,15 +90,15 @@
   }
 
   .amount-positive {
-    @apply text-success font-semibold font-mono;
+    @apply text-premium-green font-semibold font-mono;
   }
 
   .amount-negative {
-    @apply text-error font-semibold font-mono;
+    @apply text-premium-red font-semibold font-mono;
   }
 
   .amount-zero {
-    @apply text-base-content/50 font-mono;
+    @apply text-premium-text-muted font-mono;
   }
 }
 
@@ -64,8 +123,8 @@
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(var(--bc) / 0.15); border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(var(--bc) / 0.3); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.1); }
 
 /* Shimmer animation for skeleton loaders */
 @keyframes shimmer {
@@ -74,6 +133,20 @@
 }
 .shimmer {
   animation: shimmer 2s infinite linear;
-  background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
+  background: linear-gradient(90deg, rgba(11,20,38,0.8) 0%, rgba(14,25,48,0.8) 50%, rgba(11,20,38,0.8) 100%);
   background-size: 1000px 100%;
+}
+
+/* Focus states */
+.btn-premium:focus-visible {
+  outline: 2px solid var(--premium-cyan);
+  outline-offset: 2px;
+}
+
+/* Disabled state */
+.btn-premium:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
