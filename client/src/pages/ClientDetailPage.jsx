@@ -167,16 +167,16 @@ export default function ClientDetailPage() {
         ${billing?.balance < 0 ? 'bg-error/5 border-error/20' : 'bg-success/5 border-success/20'}
       `}>
         <div className="flex-1">
-          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Current Balance</p>
+          <p className="text-xs text-[#F0F4FF]/50 uppercase tracking-wider mb-1">Current Balance</p>
           <BalanceDisplay balance={billing?.balance} size="lg" />
         </div>
         <div className="flex gap-6 text-sm">
           <div>
-            <p className="text-xs text-base-content/40">Charged</p>
+            <p className="text-xs text-[#F0F4FF]/40">Charged</p>
             <p className="font-mono font-medium">{formatKES(billing?.totalCharged)}</p>
           </div>
           <div>
-            <p className="text-xs text-base-content/40">Paid</p>
+            <p className="text-xs text-[#F0F4FF]/40">Paid</p>
             <p className="font-mono font-medium text-success">{formatKES(billing?.totalPaid)}</p>
           </div>
           {billing?.phase === 'post_expiry' && (
@@ -205,7 +205,7 @@ export default function ClientDetailPage() {
       </div>
 
       {/* Tab content */}
-      <div className="bg-base-100 rounded-2xl border border-base-300 p-5 shadow-sm">
+      <div className="bg-[#0B1426] rounded-2xl border border-base-300 p-5 shadow-sm">
 
         {/* ── Overview ── */}
         {activeTab === 'Overview' && (
@@ -224,7 +224,7 @@ export default function ClientDetailPage() {
                   ['Daily Rate (post-expiry)', formatKES(client.customDailyRate || billing?.dailyRate || 1500)],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between py-1 border-b border-base-200">
-                    <dt className="text-base-content/50">{k}</dt>
+                    <dt className="text-[#F0F4FF]/50">{k}</dt>
                     <dd className="font-medium font-mono text-xs text-right">{v}</dd>
                   </div>
                 ))}
@@ -243,19 +243,19 @@ export default function ClientDetailPage() {
                     ['Address', client.sponsor.address || '—'],
                   ].map(([k, v]) => (
                     <div key={k} className="flex justify-between py-1 border-b border-base-200">
-                      <dt className="text-base-content/50">{k}</dt>
+                      <dt className="text-[#F0F4FF]/50">{k}</dt>
                       <dd className="font-medium text-right max-w-[60%] break-words">{v}</dd>
                     </div>
                   ))}
                 </dl>
               ) : (
-                <p className="text-base-content/30 text-sm">No sponsor assigned</p>
+                <p className="text-[#F0F4FF]/30 text-sm">No sponsor assigned</p>
               )}
 
               {client.comments && (
                 <div className="mt-4">
                   <h4 className="font-display text-base mb-2">Comments / Directives</h4>
-                  <pre className="bg-base-200 rounded-xl p-3 text-xs font-mono whitespace-pre-wrap text-base-content/70 max-h-40 overflow-y-auto">
+                  <pre className="bg-[#070D19] rounded-xl p-3 text-xs font-mono whitespace-pre-wrap text-[#F0F4FF]/70 max-h-40 overflow-y-auto">
                     {client.comments}
                   </pre>
                 </div>
@@ -290,10 +290,10 @@ export default function ClientDetailPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between mb-1">
               <h4 className="font-display text-base">Alerts</h4>
-              <span className="text-xs text-base-content/40">{alerts.length} total</span>
+              <span className="text-xs text-[#F0F4FF]/40">{alerts.length} total</span>
             </div>
             {alerts.length === 0 ? (
-              <p className="text-center text-base-content/30 py-8 text-sm">No alerts for this client</p>
+              <p className="text-center text-[#F0F4FF]/30 py-8 text-sm">No alerts for this client</p>
             ) : (
               alerts.map(a => (
                 <div
@@ -308,16 +308,16 @@ export default function ClientDetailPage() {
                   <span className="text-lg mt-0.5">{getAlertTypeIcon(a.alertType)}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-semibold font-mono text-base-content/50 uppercase">
+                      <span className="text-xs font-semibold font-mono text-[#F0F4FF]/50 uppercase">
                         {a.alertType?.replace(/_/g, ' ')}
                       </span>
                       {!a.isRead && <span className="badge badge-primary badge-xs">New</span>}
                     </div>
                     <p className="text-sm leading-snug">{a.message}</p>
-                    <p className="text-xs text-base-content/30 mt-1 font-mono">{timeAgo(a.createdAt)}</p>
+                    <p className="text-xs text-[#F0F4FF]/30 mt-1 font-mono">{timeAgo(a.createdAt)}</p>
                   </div>
                   <button
-                    className="btn btn-xs btn-ghost text-base-content/30 hover:text-error shrink-0"
+                    className="btn btn-xs btn-ghost text-[#F0F4FF]/30 hover:text-error shrink-0"
                     onClick={() => handleDismissAlert(a._id)}
                     title="Dismiss"
                   >

@@ -122,7 +122,7 @@ export default function SponsorsPage() {
           {sponsors.map(sponsor => (
             <div
               key={sponsor._id}
-              className="bg-base-100 border border-base-300 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-[#0B1426] border border-base-300 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
@@ -154,7 +154,7 @@ export default function SponsorsPage() {
                 </div>
               </div>
 
-              <div className="space-y-1.5 text-xs text-base-content/60">
+              <div className="space-y-1.5 text-xs text-[#F0F4FF]/60">
                 {sponsor.phone && (
                   <div className="flex items-center gap-2">
                     <span>📞</span>
@@ -176,7 +176,7 @@ export default function SponsorsPage() {
               </div>
 
               <div className="mt-3 pt-3 border-t border-base-200 flex items-center justify-between">
-                <span className="text-xs text-base-content/40">
+                <span className="text-xs text-[#F0F4FF]/40">
                   {sponsor.clientCount ?? 0} client{sponsor.clientCount !== 1 ? 's' : ''}
                 </span>
                 {sponsor.clientCount > 0 && (
@@ -190,7 +190,7 @@ export default function SponsorsPage() {
               </div>
 
               {sponsor.notes && (
-                <p className="text-xs text-base-content/40 mt-2 line-clamp-2 italic">
+                <p className="text-xs text-[#F0F4FF]/40 mt-2 line-clamp-2 italic">
                   {sponsor.notes}
                 </p>
               )}

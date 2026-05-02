@@ -23,19 +23,19 @@ export default function BillingBreakdown({ billing }) {
     <div className="space-y-4">
       {/* Summary row */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-base-200 rounded-xl p-3 text-center">
-          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Total Charged</p>
-          <p className="font-mono font-semibold text-base-content">{formatKES(totalCharged)}</p>
+        <div className="bg-[#070D19] rounded-xl p-3 text-center">
+          <p className="text-xs text-[#F0F4FF]/50 uppercase tracking-wider mb-1">Total Charged</p>
+          <p className="font-mono font-semibold text-[#F0F4FF]">{formatKES(totalCharged)}</p>
         </div>
-        <div className="bg-base-200 rounded-xl p-3 text-center">
-          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">Total Paid</p>
+        <div className="bg-[#070D19] rounded-xl p-3 text-center">
+          <p className="text-xs text-[#F0F4FF]/50 uppercase tracking-wider mb-1">Total Paid</p>
           <p className="font-mono font-semibold text-success">{formatKES(totalPaid)}</p>
         </div>
-        <div className={`rounded-xl p-3 text-center ${balance < 0 ? 'bg-error/10' : balance > 0 ? 'bg-success/10' : 'bg-base-200'}`}>
-          <p className="text-xs text-base-content/50 uppercase tracking-wider mb-1">
+        <div className={`rounded-xl p-3 text-center ${balance < 0 ? 'bg-error/10' : balance > 0 ? 'bg-success/10' : 'bg-[#070D19]'}`}>
+          <p className="text-xs text-[#F0F4FF]/50 uppercase tracking-wider mb-1">
             {balance < 0 ? 'Amount Owed' : balance > 0 ? 'Credit' : 'Balance'}
           </p>
-          <p className={`font-mono font-semibold ${balance < 0 ? 'text-error' : balance > 0 ? 'text-success' : 'text-base-content'}`}>
+          <p className={`font-mono font-semibold ${balance < 0 ? 'text-error' : balance > 0 ? 'text-success' : 'text-[#F0F4FF]'}`}>
             {balance === 0 ? 'Settled ✓' : `${balance < 0 ? '−' : '+'}${formatKES(Math.abs(balance))}`}
           </p>
         </div>
@@ -55,7 +55,7 @@ export default function BillingBreakdown({ billing }) {
 
       {/* Charge breakdown timeline */}
       <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-3">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-[#F0F4FF]/40 mb-3">
           Charge Schedule
         </h4>
         <div className="space-y-2">
@@ -63,7 +63,7 @@ export default function BillingBreakdown({ billing }) {
             <div
               key={i}
               className={`flex items-center justify-between p-3 rounded-xl border text-sm
-                ${TYPE_COLORS[item.type] || 'bg-base-200 text-base-content border-base-300'}
+                ${TYPE_COLORS[item.type] || 'bg-[#070D19] text-[#F0F4FF] border-base-300'}
               `}
             >
               <div className="flex items-center gap-2">
@@ -77,7 +77,7 @@ export default function BillingBreakdown({ billing }) {
             </div>
           ))}
           {breakdown.length === 0 && (
-            <p className="text-sm text-base-content/30 text-center py-4">
+            <p className="text-sm text-[#F0F4FF]/30 text-center py-4">
               No charges computed yet
             </p>
           )}

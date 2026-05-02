@@ -102,6 +102,41 @@ body::before {
   }
 }
 
+.modal-box { background: #0E1930 !important; border: 1px solid #1A263D !important; border-radius: 14px !important; box-shadow: 0 25px 60px rgba(2,4,12,0.8) !important; }
+
+.input, .select, .textarea {
+  background: #070D19 !important;
+  border-color: #1A263D !important;
+  color: #F0F4FF !important;
+}
+.input:focus, .select:focus, .textarea:focus {
+  border-color: #06B6D4 !important;
+  box-shadow: 0 0 0 2px rgba(6,182,212,0.15) !important;
+}
+::placeholder { color: #3D4F6B !important; }
+
+/* Toast notifications */
+.toast {
+  background: #0E1930 !important;
+  border: 1px solid #1A263D !important;
+  color: #F0F4FF !important;
+  border-radius: 10px !important;
+}
+
+/* Loading skeleton blocks */
+.skeleton {
+  background: #1A263D;
+  border-radius: 6px;
+  animation: shimmer-load 2s infinite linear;
+  background: linear-gradient(90deg, #1A263D 0%, #0E1930 50%, #1A263D 100%);
+  background-size: 1000px 100%;
+}
+
+@keyframes shimmer-load {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
 /* Smooth sidebar transition */
 .sidebar-enter {
   transform: translateX(-100%);
@@ -149,4 +184,37 @@ body::before {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+.input:focus, .select:focus, .textarea:focus {
+  border-color: #06B6D4 !important;
+  box-shadow: 0 0 0 2px rgba(6,182,212,0.15) !important;
+}
+::placeholder { color: #3D4F6B !important; }
+
+/* Toast notifications */
+.toast {
+  background: #0E1930 !important;
+  border: 1px solid #1A263D !important;
+  color: #F0F4FF !important;
+  border-radius: 10px !important;
+}
+
+/* Skeleton loader animation */
+@keyframes shimmer-load {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+.skeleton-shimmer {
+  animation: shimmer-load 2s infinite linear;
+  background: linear-gradient(90deg, #1A263D 0%, #0E1930 50%, #1A263D 100%);
+  background-size: 1000px 100%;
+}
+
+/* Loading skeleton blocks */
+.skeleton {
+  background: #1A263D;
+  border-radius: 6px;
+  animation: shimmer-load 2s infinite linear;
+  background: linear-gradient(90deg, #1A263D 0%, #0E1930 50%, #1A263D 100%);
+  background-size: 1000px 100%;
 }

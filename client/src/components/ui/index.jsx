@@ -9,8 +9,8 @@ export function PageHeader({ title, subtitle, actions }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
       <div className="flex-1">
-        <h2 className="text-2xl font-display text-base-content">{title}</h2>
-        {subtitle && <p className="text-sm text-base-content/60 mt-0.5 font-body">{subtitle}</p>}
+        <h2 className="text-2xl font-display text-[#F0F4FF]">{title}</h2>
+        {subtitle && <p className="text-sm text-[#F0F4FF]/60 mt-0.5 font-body">{subtitle}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
@@ -22,8 +22,8 @@ export function EmptyState({ icon = '📭', title, message, action }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="text-5xl mb-4">{icon}</div>
-      <h3 className="font-display text-lg text-base-content/70 mb-1">{title}</h3>
-      <p className="text-sm text-base-content/40 max-w-xs mb-4">{message}</p>
+      <h3 className="font-display text-lg text-[#F0F4FF]/70 mb-1">{title}</h3>
+      <p className="text-sm text-[#F0F4FF]/40 max-w-xs mb-4">{message}</p>
       {action}
     </div>
   )
@@ -35,7 +35,7 @@ export function ErrorState({ message, onRetry }) {
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="text-5xl mb-4">⚠️</div>
       <h3 className="font-display text-lg text-error mb-1">Something went wrong</h3>
-      <p className="text-sm text-base-content/50 max-w-xs mb-4">{message}</p>
+      <p className="text-sm text-[#F0F4FF]/50 max-w-xs mb-4">{message}</p>
       {onRetry && (
         <button className="btn btn-sm btn-outline" onClick={onRetry}>Try again</button>
       )}
@@ -47,14 +47,14 @@ export function ErrorState({ message, onRetry }) {
 export function StatCard({ label, value, sub, icon, colorClass = 'text-primary', trend, onClick }) {
   return (
     <div
-      className={`stat-card ${onClick ? 'cursor-pointer hover:bg-base-100 transition-colors' : ''}`}
+      className={`stat-card ${onClick ? 'cursor-pointer hover:bg-[#0B1426] transition-colors' : ''}`}
       onClick={onClick}
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-1">{label}</p>
+          <p className="text-xs font-semibold text-[#F0F4FF]/50 uppercase tracking-wider mb-1">{label}</p>
           <p className={`text-2xl font-display font-semibold ${colorClass}`}>{value}</p>
-          {sub && <p className="text-xs text-base-content/40 mt-1">{sub}</p>}
+          {sub && <p className="text-xs text-[#F0F4FF]/40 mt-1">{sub}</p>}
         </div>
         {icon && (
           <span className="text-3xl opacity-70">{icon}</span>
@@ -96,7 +96,7 @@ export function FormField({ label, required, error, children, hint }) {
         </span>
       </label>
       {children}
-      {hint && <label className="label py-0.5"><span className="label-text-alt text-base-content/40">{hint}</span></label>}
+      {hint && <label className="label py-0.5"><span className="label-text-alt text-[#F0F4FF]/40">{hint}</span></label>}
       {error && <label className="label py-0.5"><span className="label-text-alt text-error">{error}</span></label>}
     </div>
   )
@@ -105,7 +105,7 @@ export function FormField({ label, required, error, children, hint }) {
 // Balance display
 export function BalanceDisplay({ balance, size = 'sm' }) {
   const textSize = size === 'lg' ? 'text-2xl' : 'text-sm'
-  if (balance === null || balance === undefined) return <span className="text-base-content/30">—</span>
+  if (balance === null || balance === undefined) return <span className="text-[#F0F4FF]/30">—</span>
 
   if (balance > 0) return (
     <span className={`${textSize} font-mono font-semibold text-success`}>
@@ -126,7 +126,7 @@ export function ConfirmDialog({ id, title, message, onConfirm, danger = true }) 
     <dialog id={id} className="modal">
       <div className="modal-box font-body max-w-sm">
         <h3 className="font-display text-lg mb-2">{title}</h3>
-        <p className="text-sm text-base-content/60">{message}</p>
+        <p className="text-sm text-[#F0F4FF]/60">{message}</p>
         <div className="modal-action">
           <form method="dialog" className="flex gap-2">
             <button className="btn btn-sm btn-ghost">Cancel</button>
