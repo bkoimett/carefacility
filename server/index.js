@@ -44,12 +44,22 @@ app.use((err, req, res, next) => {
 });
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
+const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
+
+console.log('MONGODB_URI exists?', !!MONGODB_URI);
+console.log('All env vars:', Object.keys(process.env));
+
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI environment variable is not set');
+  process.exit(1);
+}
+
+mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
 
     const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
 
