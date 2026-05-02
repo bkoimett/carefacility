@@ -77,9 +77,17 @@ export default function ClientDetailPage() {
   }
 
   const handleDischarge = async () => {
-    await run(() => clientsApi.update(id, { status: 'discharged', dateOfDischarge: new Date().toISOString() }))
+    await run(() => clientsApi.discharge(id))
     document.getElementById('discharge-confirm').close()
     refetch()
+    showSuccess('Client discharged successfully')
+  }
+
+  const handleDelete = async () => {
+    await run(() => clientsApi.delete(id))
+    document.getElementById('delete-confirm').close()
+    navigate('/clients')
+    showSuccess('Client permanently deleted')
   }
 
    if (loading) return <DetailSkeleton />;
@@ -116,7 +124,7 @@ export default function ClientDetailPage() {
             >
               + Payment
             </button>
-            {client.status === 'active' && (
+        {client.status === 'active' && (
               <button
                 className="btn btn-sm btn-warning gap-1"
                 onClick={() => document.getElementById('discharge-confirm').showModal()}
@@ -124,6 +132,12 @@ export default function ClientDetailPage() {
                 Discharge
               </button>
             )}
+            <button
+              className="btn btn-sm btn-error gap-1"
+              onClick={() => document.getElementById('delete-confirm').showModal()}
+            >
+              Delete
+            </button>
           </div>
         }
       />
@@ -339,6 +353,13 @@ export default function ClientDetailPage() {
         message={`Mark ${client.name} as discharged? This will stop all billing and alerts.`}
         onConfirm={handleDischarge}
         danger={false}
+      />
+      <ConfirmDialog
+        id="delete-confirm"
+        title="Delete Client"
+        message={`Are you sure? This will permanently delete client ${client.name} and all associated payments. This action cannot be undone.`}
+        onConfirm={handleDelete}
+        danger={true}
       />
     </div>
   )

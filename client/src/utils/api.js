@@ -21,6 +21,7 @@ export const clientsApi = {
   create: (data) => api.post('/clients', data),
   update: (id, data) => api.put(`/clients/${id}`, data),
   delete: (id) => api.delete(`/clients/${id}`),
+  discharge: (id) => api.put(`/clients/${id}/discharge`),
   getBilling: (id) => api.get(`/clients/${id}/billing`),
 }
 

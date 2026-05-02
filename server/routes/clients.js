@@ -8,6 +8,7 @@ router.get('/filter/:status', ctrl.getClientsByStatus);
 router.get('/:id', ctrl.getClientById);
 router.post('/', validateClient, ctrl.createClient);
 router.put('/:id', validateClient, ctrl.updateClient);
+router.put('/:id/discharge', ctrl.dischargeClient);
 router.delete('/:id', ctrl.deleteClient);
 router.get('/:id/billing', ctrl.getClientBilling);
 

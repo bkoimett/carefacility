@@ -164,6 +164,23 @@ exports.deleteClient = async (req, res) => {
   }
 };
 
+// PUT /api/clients/:id/discharge
+exports.dischargeClient = async (req, res) => {
+  try {
+    const client = await Client.findByIdAndUpdate(
+      req.params.id,
+      { status: 'discharged', dateOfDischarge: new Date() },
+      { new: true }
+    );
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+    res.json({ message: 'Client discharged successfully', client });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // GET /api/clients/:id/billing
 exports.getClientBilling = async (req, res) => {
   try {
