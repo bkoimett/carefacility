@@ -88,18 +88,18 @@ export default function AlertsPage() {
   if (error) return <ErrorState message={error} onRetry={refetch} />
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Page Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 lg:mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-[#F0F4FF]">Alerts</h1>
           <p className="text-[#3D4F6B] text-sm mt-1">
             {unreadCount > 0 ? `${unreadCount} unread · ${allAlerts.length} total` : `${allAlerts.length} alerts`}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <button
-            className="btn-premium flex items-center gap-2"
+            className="btn-premium flex items-center gap-2 justify-center w-full sm:w-auto"
             onClick={handleTriggerJob}
             disabled={actioning}
           >
@@ -114,7 +114,7 @@ export default function AlertsPage() {
           </button>
           {unreadCount > 0 && (
             <button
-              className="btn-premium flex items-center gap-2"
+              className="btn-premium flex items-center gap-2 justify-center w-full sm:w-auto"
               onClick={handleMarkAllRead}
               disabled={actioning}
             >
@@ -127,9 +127,9 @@ export default function AlertsPage() {
         </div>
       </div>
 
-      {/* Critical/Warning summaries */}
+      {/* Summary Banners */}
       {(criticalCount > 0 || warningCount > 0) && (
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           {criticalCount > 0 && (
             <div className="flex items-center gap-2 px-4 py-2 rounded-[8px] bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)]">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2">
@@ -155,28 +155,31 @@ export default function AlertsPage() {
       )}
 
       {/* Filter Bar */}
-      <div className="flex items-center gap-3 mb-6">
-        {/* Severity Filter Tabs */}
-        <div className="flex items-center bg-[#0B1426] border border-[#1A263D] rounded-[8px] p-1">
-          {['all', 'critical', 'warning', 'info'].map(s => (
-            <button
-              key={s}
-              className={`px-4 py-1.5 text-sm rounded-[6px] transition-all duration-150 ${severityFilter === s
-                ? 'bg-[#1A263D] text-[#F0F4FF] font-medium'
-                : 'text-[#6B7FA3]'
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
+        {/* Severity Filter Tabs - scrollable on mobile */}
+        <div className="overflow-x-auto -mx-1 px-1">
+          <div className="flex items-center gap-1 min-w-max">
+            {['all', 'critical', 'warning', 'info'].map(s => (
+              <button
+                key={s}
+                className={`px-4 py-1.5 text-sm rounded-[6px] transition-all duration-150 whitespace-nowrap ${
+                  severityFilter === s
+                    ? 'bg-[#1A263D] text-[#F0F4FF] font-medium'
+                    : 'text-[#6B7FA3]'
                 }`}
-              onClick={() => setSeverityFilter(s)}
-            >
-              {s === 'all' ? `All (${allAlerts.length})` : s.charAt(0).toUpperCase() + s.slice(1)}
-              {(severityFilter !== s || s === 'all') && (
-                <span className={`text-[8px] ml-1.5 rounded-full px-1.5 py-0.5 ${
-                  severityFilter === s ? 'bg-[#06B6D4] text-white' : 'bg-[#1A263D] text-[#6B7FA3]'
-                }`}>
-                  {s === 'all' ? allAlerts.length : allAlerts.filter(a => a.severity === s).length}
-                </span>
-              )}
-            </button>
-          ))}
+                onClick={() => setSeverityFilter(s)}
+              >
+                {s === 'all' ? `All (${allAlerts.length})` : s.charAt(0).toUpperCase() + s.slice(1)}
+                {(severityFilter !== s || s === 'all') && (
+                  <span className={`text-[8px] ml-1.5 rounded-full px-1.5 py-0.5 ${
+                    severityFilter === s ? 'bg-[#06B6D4] text-white' : 'bg-[#1A263D] text-[#6B7FA3]'
+                  }`}>
+                    {s === 'all' ? allAlerts.length : allAlerts.filter(a => a.severity === s).length}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Type Filter */}
@@ -197,8 +200,8 @@ export default function AlertsPage() {
         </div>
 
         {/* Toggle Dismissed */}
-        <label className="flex items-center gap-2 cursor-pointer text-sm text-[#6B7FA3] hover:text-[#F0F4FF] transition-colors">
-          <div className="w-4 h-4 rounded-[3px] border border-[#1A263D] flex items-center justify-center">
+        <label className="flex items-center gap-2 cursor-pointer text-sm text-[#6B7FA3] hover:text-[#F0F4FF] transition-colors whitespace-nowrap">
+          <div className="w-4 h-4 rounded-[3px] border border-[#1A263D] flex items-center justify-center flex-shrink-0">
             {showDismissed && (
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" strokeWidth="3">
                 <path d="M20 6L9 17l-5-5" />
@@ -215,7 +218,7 @@ export default function AlertsPage() {
           <div className="w-8 h-8 border-2 border-[#06B6D4] border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : alerts.length === 0 ? (
-        <div className="card-premium p-12 text-center">
+        <div className="card-premium p-6 sm:p-12 text-center">
           <div className="w-16 h-16 rounded-full bg-[#070D19]/50 mx-auto mb-4 flex items-center justify-center">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3D4F6B" strokeWidth="1.5">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -234,7 +237,7 @@ export default function AlertsPage() {
             return (
               <div
                 key={alert._id}
-                className="card-premium px-6 py-4 relative overflow-hidden group hover:border-[#1A263D]/60 transition-all duration-200"
+                className="card-premium px-4 py-3.5 sm:px-6 sm:py-4 relative overflow-hidden group hover:border-[#1A263D]/60 transition-all duration-200"
               >
                 {/* Left accent bar */}
                 <div className="absolute left-0 top-0 bottom-0 w-0.5 rounded-full" style={{ backgroundColor: style.accent }}></div>
@@ -269,8 +272,8 @@ export default function AlertsPage() {
                     <p className="text-xs text-[#3D4F6B] mt-2 font-mono">{timeAgo(alert.createdAt)}</p>
                   </div>
 
-                  {/* Right actions */}
-                  <div className="flex flex-col gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {/* Right actions - always visible on mobile */}
+                  <div className="flex flex-col gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity mt-2 sm:mt-0">
                     {!alert.isRead && (
                       <button
                         className="text-xs text-[#06B6D4] hover:underline px-2 py-1"
