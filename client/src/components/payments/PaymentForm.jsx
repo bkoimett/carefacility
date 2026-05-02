@@ -43,7 +43,7 @@ export default function PaymentForm({ clientName, onSubmit, loading }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <div className="space-y-5">
       {/* Client info banner */}
       {clientName && (
         <div className="rounded-[8px] border border-[#1A263D] bg-[rgba(6,182,212,0.08)] px-4 py-3 text-sm text-[#06B6D4]">
@@ -184,22 +184,23 @@ export default function PaymentForm({ clientName, onSubmit, loading }) {
         />
       </div>
 
-      {/* Form Actions */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#1A263D] mt-2">
-        <form method="dialog">
-          <button type="submit" className="px-4 py-2.5 text-sm text-[#6B7FA3] hover:text-[#F0F4FF] rounded-[8px] hover:bg-[#1A263D] transition-all">
-            Cancel
-          </button>
-        </form>
-        <button
-          type="submit"
-          className="btn-premium px-6 py-2.5 text-sm"
-          disabled={loading}
-        >
-          {loading && <span className="loading loading-spinner loading-xs mr-2" />}
-          Record Payment
-        </button>
-      </div>
-    </form>
+       {/* Form Actions */}
+       <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#1A263D] mt-2">
+         <button type="button" className="px-4 py-2.5 text-sm text-[#6B7FA3] hover:text-[#F0F4FF] rounded-[8px] hover:bg-[#1A263D] transition-all" onClick={() => {
+           // Trigger dialog close via ESC or backdrop click - this is handled by the Modal
+         }}>
+           Cancel
+         </button>
+         <button
+           type="button"
+           className="btn-premium px-6 py-2.5 text-sm"
+           disabled={loading}
+           onClick={handleSubmit}
+         >
+           {loading && <span className="loading loading-spinner loading-xs mr-2" />}
+           Record Payment
+         </button>
+       </div>
+     </div>
   )
 }
