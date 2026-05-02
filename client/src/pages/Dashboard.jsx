@@ -8,6 +8,8 @@ import { dashboardApi, alertsApi } from '../utils/api'
 import { formatKES, formatDate, getAlertTypeIcon, timeAgo } from '../utils/formatters'
 import { StatCard, Spinner, ErrorState, PageHeader } from '../components/ui'
 import { DashboardSkeleton } from '../components/SkeletonLoader'
+import { RevenueDetails } from '../components/RevenueDetails'
+import { DebtDetails } from '../components/DebtDetails'
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
@@ -17,6 +19,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
+
+  const [trendData, setTrendData] = useState([])
+  const [revenueModalOpen, setRevenueModalOpen] = useState(false)
+  const [debtModalOpen, setDebtModalOpen] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -28,6 +34,14 @@ export default function Dashboard() {
         ])
         setStats(statsRes.data.data)
         setAlerts(alertsRes.data.data || [])
+
+        if (statsRes.data.data?.revenueTrend) {
+          setTrendData(statsRes.data.data.revenueTrend.map(d => ({
+            name: `${MONTHS[d._id.month - 1]} ${d._id.year}`,
+            revenue: d.total,
+            payments: d.count
+          })))
+        }
       } catch (err) {
         setError(err.message)
       } finally {
@@ -38,12 +52,6 @@ export default function Dashboard() {
   }, [])
 
   if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />
-
-  const trendData = (stats?.revenueTrend || []).map(d => ({
-    name: `${MONTHS[d._id.month - 1]} ${d._id.year}`,
-    revenue: d.total,
-    payments: d.count
-  }))
 
   const totalAlerts = (stats?.alerts?.critical || 0) + (stats?.alerts?.warning || 0) + (stats?.alerts?.info || 0)
 
@@ -73,6 +81,7 @@ export default function Dashboard() {
               sub={`${formatKES(stats?.revenue?.total)} all time`}
               icon="💰"
               colorClass="text-success"
+              onClick={() => setRevenueModalOpen(true)}
             />
             <StatCard
               label="Outstanding Debt"
@@ -80,6 +89,7 @@ export default function Dashboard() {
               sub={`${(stats?.outstanding?.clients || []).length} clients overdue`}
               icon="⚠️"
               colorClass={stats?.outstanding?.total > 0 ? 'text-error' : 'text-success'}
+              onClick={() => setDebtModalOpen(true)}
             />
             <StatCard
               label="Unread Alerts"
@@ -306,6 +316,15 @@ export default function Dashboard() {
           </div>
         </>
       )}
+
+      <RevenueDetails
+        isOpen={revenueModalOpen}
+        onClose={() => setRevenueModalOpen(false)}
+      />
+      <DebtDetails
+        isOpen={debtModalOpen}
+        onClose={() => setDebtModalOpen(false)}
+      />
     </div>
   )
 }

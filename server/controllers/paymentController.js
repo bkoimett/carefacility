@@ -78,6 +78,47 @@ exports.updatePayment = async (req, res) => {
   }
 };
 
+// GET /api/payments/monthly-summary
+exports.getPaymentsMonthlySummary = async (req, res) => {
+  try {
+    const payments = await Payment.aggregate([
+      {
+        $group: {
+          _id: { year: { $year: '$paymentDate' }, month: { $month: '$paymentDate' } },
+          total: { $sum: '$amount' },
+          count: { $sum: 1 },
+          payments: {
+            $push: {
+              _id: '$_id',
+              amount: '$amount',
+              paymentDate: '$paymentDate',
+              paymentMethod: '$paymentMethod',
+              paidBy: '$paidBy',
+              paymentType: '$paymentType',
+              reference: '$reference',
+              client: '$client'
+            }
+          }
+        }
+      },
+      { $sort: { '_id.year': -1, '_id.month': -1 } }
+    ]);
+
+    // Populate client names for each payment
+    const populatedPayments = await Promise.all(payments.map(async (m) => {
+      const populated = await Payment.populate(m.payments, { path: 'client', select: 'name' });
+      return {
+        ...m,
+        payments: populated
+      };
+    }));
+
+    res.json(populatedPayments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // DELETE /api/payments/:id
 exports.deletePayment = async (req, res) => {
   try {

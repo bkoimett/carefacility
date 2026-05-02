@@ -164,6 +164,49 @@ exports.deleteClient = async (req, res) => {
   }
 };
 
+// GET /api/clients/debt-summary
+exports.getClientsDebtSummary = async (req, res) => {
+  try {
+    const activeClients = await Client.find({ status: 'active' }).populate('sponsor', 'name');
+    const debtSummary = [];
+
+    for (const client of activeClients) {
+      const payments = await Payment.find({ client: client._id });
+      const billing = computeBillingState(client.toObject(), payments);
+
+      if (billing.balance < 0) {
+        const today = new Date();
+        const admissionDate = new Date(client.dateOfAdmission);
+        const agreedEndDate = new Date(
+          admissionDate.getFullYear(),
+          admissionDate.getMonth() + client.agreedDurationMonths,
+          admissionDate.getDate()
+        );
+        const daysOverdue = Math.floor((today - agreedEndDate) / (1000 * 60 * 60 * 24));
+
+        debtSummary.push({
+          _id: client._id,
+          name: client.name,
+          balance: billing.balance,
+          daysOverdue: daysOverdue > 0 ? daysOverdue : 0,
+          dateOfAdmission: client.dateOfAdmission,
+          agreedDurationMonths: client.agreedDurationMonths,
+          phase: billing.phase,
+          daysPostExpiry: billing.daysPostExpiry,
+          sponsor: client.sponsor
+        });
+      }
+    }
+
+    // Sort by highest debt first (most negative balance)
+    debtSummary.sort((a, b) => a.balance - b.balance);
+
+    res.json({ clients: debtSummary, totalDebt: debtSummary.reduce((sum, c) => sum + Math.abs(c.balance), 0) });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // PUT /api/clients/:id/discharge
 exports.dischargeClient = async (req, res) => {
   try {

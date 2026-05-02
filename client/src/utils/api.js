@@ -40,6 +40,7 @@ export const paymentsApi = {
   create: (data) => api.post('/payments', data),
   update: (id, data) => api.put(`/payments/${id}`, data),
   delete: (id) => api.delete(`/payments/${id}`),
+  getMonthlySummary: () => api.get('/payments/monthly-summary'),
 }
 
 // ── Alerts ───────────────────────────────────────────────────────────
@@ -54,6 +55,8 @@ export const alertsApi = {
 // ── Dashboard ────────────────────────────────────────────────────────
 export const dashboardApi = {
   getStats: () => api.get('/dashboard/stats'),
+  getPaymentsMonthlySummary: () => api.get('/payments/monthly-summary'),
+  getClientsDebtSummary: () => api.get('/clients/debt-summary'),
 }
 
 export default api

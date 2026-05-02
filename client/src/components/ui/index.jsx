@@ -44,9 +44,12 @@ export function ErrorState({ message, onRetry }) {
 }
 
 // Stat card
-export function StatCard({ label, value, sub, icon, colorClass = 'text-primary', trend }) {
+export function StatCard({ label, value, sub, icon, colorClass = 'text-primary', trend, onClick }) {
   return (
-    <div className="stat-card">
+    <div
+      className={`stat-card ${onClick ? 'cursor-pointer hover:bg-base-100 transition-colors' : ''}`}
+      onClick={onClick}
+    >
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-1">{label}</p>
@@ -67,9 +70,9 @@ export function StatCard({ label, value, sub, icon, colorClass = 'text-primary',
 }
 
 // Modal wrapper
-export function Modal({ id, title, children, size = 'max-w-lg' }) {
+export function Modal({ id, title, children, size = 'max-w-lg', isOpen, onClose }) {
   return (
-    <dialog id={id} className="modal">
+    <dialog id={id} className="modal" open={isOpen} onClose={onClose}>
       <div className={`modal-box ${size} font-body`}>
         <form method="dialog">
           <button className="btn btn-sm btn-circle btn-ghost absolute right-3 top-3">✕</button>
