@@ -1,5 +1,15 @@
 import { useState } from 'react'
 import { FormField } from '../ui'
+import { AlertCircle } from 'lucide-react'
+
+const PAYMENT_TYPES = [
+  { value: 'monthly_fee', label: 'Monthly Fee' },
+  { value: 'medical_fee', label: 'Medical Fee' },
+  { value: 'deposit', label: 'Deposit' },
+  { value: 'daily_charge', label: 'Daily Charge' },
+  { value: 'credit_adjustment', label: 'Adjustment (Credit)' },
+  { value: 'other', label: 'Other' },
+]
 
 const defaultForm = {
   amount: '',
@@ -14,110 +24,179 @@ const defaultForm = {
 
 export default function PaymentForm({ clientName, onSubmit, loading }) {
   const [form, setForm] = useState(defaultForm)
+  const [errors, setErrors] = useState({})
 
-  const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }))
+  const set = (field) => (e) => {
+    setForm(f => ({ ...f, [field]: e.target.value }))
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }))
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onSubmit({ ...form, amount: Number(form.amount) })
+    const amount = Number(form.amount)
+    if (!amount) {
+      setErrors({ amount: 'Amount is required' })
+      return
+    }
+    onSubmit({ ...form, amount })
     setForm(defaultForm)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Client info banner */}
       {clientName && (
-        <div className="alert alert-info py-2 text-sm">
+        <div className="rounded-[8px] border border-[#1A263D] bg-[rgba(6,182,212,0.08)] px-4 py-3 text-sm text-[#06B6D4]">
           Recording payment for <strong>{clientName}</strong>
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <FormField label="Amount (KES)" required hint="Use negative for credit/overpayment">
+      {/* Payment Details */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <label className="block text-[#6B7FA3] text-xs font-medium mb-1.5">
+            Amount (KES) <span className="text-[#EF4444]">*</span>
+          </label>
           <input
             type="number"
-            className="input input-bordered input-sm w-full font-mono"
+            className="w-full bg-[#070D19] border border-[#1A263D] rounded-[8px] px-4 py-2.5 text-sm font-mono text-[#F0F4FF] placeholder:text-[#3D4F6B] focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[rgba(6,182,212,0.1)] transition-all"
             value={form.amount}
             onChange={set('amount')}
             required
             placeholder="e.g. 60000 or -30000"
           />
-        </FormField>
+          {errors.amount && (
+            <p className="text-[#EF4444] text-xs mt-1 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />{errors.amount}
+            </p>
+          )}
+          <p className="text-[#3D4F6B] text-xs">Use negative for credit/overpayment</p>
+        </div>
 
-        <FormField label="Payment Date" required>
+        <div className="space-y-1.5">
+          <label className="block text-[#6B7FA3] text-xs font-medium mb-1.5">
+            Payment Date <span className="text-[#EF4444]">*</span>
+          </label>
           <input
             type="date"
-            className="input input-bordered input-sm w-full"
+            className="w-full bg-[#070D19] border border-[#1A263D] rounded-[8px] px-4 py-2.5 text-sm text-[#F0F4FF] focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[rgba(6,182,212,0.1)] transition-all"
             value={form.paymentDate}
             onChange={set('paymentDate')}
             required
           />
-        </FormField>
+        </div>
 
-        <FormField label="Payment Method">
-          <select className="select select-bordered select-sm w-full" value={form.paymentMethod} onChange={set('paymentMethod')}>
-            <option value="mpesa">M-Pesa</option>
-            <option value="cash">Cash</option>
-            <option value="bank_transfer">Bank Transfer</option>
-            <option value="cheque">Cheque</option>
-            <option value="other">Other</option>
-          </select>
-        </FormField>
+        <div className="space-y-1.5">
+          <label className="block text-[#6B7FA3] text-xs font-medium mb-1.5">
+            Payment Method
+          </label>
+          <div className="relative">
+            <select
+              className="w-full bg-[#070D19] border border-[#1A263D] rounded-[8px] px-4 py-2.5 text-sm text-[#F0F4FF] focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[rgba(6,182,212,0.1)] transition-all appearance-none"
+              value={form.paymentMethod}
+              onChange={set('paymentMethod')}
+            >
+              <option value="mpesa">M-Pesa</option>
+              <option value="cash">Cash</option>
+              <option value="bank_transfer">Bank Transfer</option>
+              <option value="cheque">Cheque</option>
+              <option value="other">Other</option>
+            </select>
+            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#3D4F6B] pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </div>
+        </div>
 
-        <FormField label="Payment Type">
-          <select className="select select-bordered select-sm w-full" value={form.paymentType} onChange={set('paymentType')}>
-            <option value="monthly_fee">Monthly Fee</option>
-            <option value="medical_fee">Medical Fee</option>
-            <option value="deposit">Deposit</option>
-            <option value="daily_charge">Daily Charge</option>
-            <option value="credit_adjustment">Credit Adjustment</option>
-            <option value="other">Other</option>
-          </select>
-        </FormField>
+        <div className="space-y-1.5">
+          <label className="block text-[#6B7FA3] text-xs font-medium mb-1.5">
+            Payment Type <span className="text-[#EF4444]">*</span>
+          </label>
+          {/* Pill-style payment type selector */}
+          <div className="flex flex-wrap gap-2">
+            {PAYMENT_TYPES.map(type => (
+              <button
+                key={type.value}
+                type="button"
+                className={`px-3.5 py-2 text-xs rounded-full border transition-all ${
+                  form.paymentType === type.value
+                    ? 'border-[#06B6D4] text-[#06B6D4] bg-[rgba(6,182,212,0.08)]'
+                    : 'border-[#1A263D] text-[#6B7FA3] hover:border-[#06B6D4] hover:text-[#06B6D4]'
+                }`}
+                onClick={() => setForm(f => ({ ...f, paymentType: type.value }))}
+              >
+                {type.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <FormField label="Paid By">
+        <div className="space-y-1.5">
+          <label className="block text-[#6B7FA3] text-xs font-medium mb-1.5">
+            Paid By
+          </label>
           <input
-            className="input input-bordered input-sm w-full"
+            className="w-full bg-[#070D19] border border-[#1A263D] rounded-[8px] px-4 py-2.5 text-sm text-[#F0F4FF] placeholder:text-[#3D4F6B] focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[rgba(6,182,212,0.1)] transition-all"
             value={form.paidBy}
             onChange={set('paidBy')}
             placeholder="Sponsor name or 'self'"
           />
-        </FormField>
+        </div>
 
-        <FormField label="Reference / Receipt No.">
+        <div className="space-y-1.5">
+          <label className="block text-[#6B7FA3] text-xs font-medium mb-1.5">
+            Reference / Receipt No.
+          </label>
           <input
-            className="input input-bordered input-sm w-full font-mono"
+            className="w-full bg-[#070D19] border border-[#1A263D] rounded-[8px] px-4 py-2.5 text-sm font-mono text-[#F0F4FF] placeholder:text-[#3D4F6B] focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[rgba(6,182,212,0.1)] transition-all"
             value={form.reference}
             onChange={set('reference')}
             placeholder="e.g. QHJ7X2..."
           />
-        </FormField>
+        </div>
       </div>
 
-      <FormField label="Billing Period Label" hint="e.g. Month 2 · April 2025">
+      {/* Billing Period Label */}
+      <div className="space-y-1.5">
+        <label className="block text-[#6B7FA3] text-xs font-medium mb-1.5">
+          Billing Period Label
+        </label>
         <input
-          className="input input-bordered input-sm w-full"
+          className="w-full bg-[#070D19] border border-[#1A263D] rounded-[8px] px-4 py-2.5 text-sm text-[#F0F4FF] placeholder:text-[#3D4F6B] focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[rgba(6,182,212,0.1)] transition-all"
           value={form.billingPeriodLabel}
           onChange={set('billingPeriodLabel')}
-          placeholder="Optional description of what this covers"
+          placeholder="e.g. Month 2 · April 2025"
         />
-      </FormField>
+        <p className="text-[#3D4F6B] text-xs">Optional description of what this payment covers</p>
+      </div>
 
-      <FormField label="Notes">
+      {/* Notes */}
+      <div className="space-y-1.5">
+        <label className="block text-[#6B7FA3] text-xs font-medium mb-1.5">
+          Notes
+        </label>
         <textarea
-          className="textarea textarea-bordered w-full text-sm resize-none"
+          className="w-full bg-[#070D19] border border-[#1A263D] rounded-[8px] px-4 py-2.5 text-sm text-[#F0F4FF] placeholder:text-[#3D4F6B] focus:outline-none focus:border-[#06B6D4] focus:ring-2 focus:ring-[rgba(6,182,212,0.1)] transition-all min-h-[80px] resize-none"
           rows={2}
           value={form.notes}
           onChange={set('notes')}
           placeholder="Any additional notes..."
         />
-      </FormField>
+      </div>
 
-      <div className="flex justify-end gap-2 pt-1">
+      {/* Form Actions */}
+      <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#1A263D] mt-2">
         <form method="dialog">
-          <button className="btn btn-sm btn-ghost" type="submit">Cancel</button>
+          <button type="submit" className="px-4 py-2.5 text-sm text-[#6B7FA3] hover:text-[#F0F4FF] rounded-[8px] hover:bg-[#1A263D] transition-all">
+            Cancel
+          </button>
         </form>
-        <button type="submit" className="btn btn-sm btn-primary" disabled={loading}>
-          {loading && <span className="loading loading-spinner loading-xs" />}
+        <button
+          type="submit"
+          className="btn-premium px-6 py-2.5 text-sm"
+          disabled={loading}
+        >
+          {loading && <span className="loading loading-spinner loading-xs mr-2" />}
           Record Payment
         </button>
       </div>
