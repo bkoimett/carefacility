@@ -8,9 +8,11 @@ import {
   Bell, 
   Settings,
   Menu,
-  X
+  X,
+  LogOut
 } from 'lucide-react'
 import { alertsApi } from '../../utils/api'
+import { useAuth } from '../../context/AuthContext'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -22,20 +24,24 @@ const navItems = [
 
 export default function Layout() {
   const location = useLocation()
+  const { user, logout } = useAuth()
   const [alertCount, setAlertCount] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  useEffect(() => {
-    const fetchUnread = async () => {
-      try {
-        const res = await alertsApi.getAll({ isRead: false, limit: 1 })
-        setAlertCount(res.data.unreadCount || 0)
-      } catch {}
-    }
-    fetchUnread()
-    const interval = setInterval(fetchUnread, 30000)
-    return () => clearInterval(interval)
-  }, [])
+  // Format role for display
+  const formattedRole = user?.role === 'admin' ? 'Administrator' : 'Staff'
+
+   useEffect(() => {
+     const fetchUnread = async () => {
+       try {
+         const res = await alertsApi.getAll({ isRead: false, limit: 1 })
+         setAlertCount(res.data.unreadCount || 0)
+       } catch {}
+     }
+     fetchUnread()
+     const interval = setInterval(fetchUnread, 30000)
+     return () => clearInterval(interval)
+   }, [])
 
   const isActive = (to) => location.pathname === to
 
@@ -97,13 +103,24 @@ export default function Layout() {
         {/* Bottom Section */}
         <div className="border-t border-[#1A263D] pt-4 mt-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0B1426] to-[#070D19] ring-1 ring-[#1A263D] flex items-center justify-center overflow-hidden">
-              <img src="https://res.cloudinary.com/deci4v6zv/image/upload/v1762617272/the-serenity-place-logo-2026-removebg_ze7l7v.png" alt="Bkoimett" className="w-full h-full object-contain" />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#06B6D4] to-[#3B82F6] flex items-center justify-center overflow-hidden">
+              <span className="text-white text-sm font-medium">
+                {user?.name?.charAt(0).toUpperCase() || 'U'}
+              </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[#F0F4FF] text-sm font-medium truncate">Bkoimett</p>
-              <p className="text-[#3D4F6B] text-xs truncate">Administrator</p>
+              <p className="text-[#F0F4FF] text-sm font-medium truncate">
+                {user?.name || 'Unknown User'}
+              </p>
+              <p className="text-[#3D4F6B] text-xs truncate">{formattedRole}</p>
             </div>
+            <button
+              onClick={logout}
+              className="w-8 h-8 rounded-[8px] border border-[#1A263D] text-[#6B7FA3] hover:text-[#EF4444] hover:border-[#EF4444] flex items-center justify-center transition-all"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
           <div className="flex items-center gap-3 px-3 py-2.5 mt-3 rounded-[8px] cursor-pointer hover:bg-[#1A263D] transition-colors" onClick={() => setSidebarOpen(false)}>
             <Settings className="w-4 h-4 text-[#3D4F6B]" />
@@ -172,13 +189,24 @@ export default function Layout() {
         {/* Bottom Section */}
         <div className="border-t border-[#1A263D] pt-4 mt-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0B1426] to-[#070D19] ring-1 ring-[#1A263D] flex items-center justify-center overflow-hidden">
-              <img src="https://res.cloudinary.com/deci4v6zv/image/upload/v1762617272/the-serenity-place-logo-2026-removebg_ze7l7v.png" alt="Bkoimett" className="w-full h-full object-contain" />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#06B6D4] to-[#3B82F6] flex items-center justify-center overflow-hidden">
+              <span className="text-white text-sm font-medium">
+                {user?.name?.charAt(0).toUpperCase() || 'U'}
+              </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[#F0F4FF] text-sm font-medium truncate">Bkoimett</p>
-              <p className="text-[#3D4F6B] text-xs truncate">Administrator</p>
+              <p className="text-[#F0F4FF] text-sm font-medium truncate">
+                {user?.name || 'Unknown User'}
+              </p>
+              <p className="text-[#3D4F6B] text-xs truncate">{formattedRole}</p>
             </div>
+            <button
+              onClick={logout}
+              className="w-8 h-8 rounded-[8px] border border-[#1A263D] text-[#6B7FA3] hover:text-[#EF4444] hover:border-[#EF4444] flex items-center justify-center transition-all"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
           <div className="flex items-center gap-3 px-3 py-2.5 mt-3 rounded-[8px] cursor-pointer hover:bg-[#1A263D] transition-colors" onClick={() => setSidebarOpen(false)}>
             <Settings className="w-4 h-4 text-[#3D4F6B]" />
@@ -221,8 +249,10 @@ export default function Layout() {
             </button>
             <div className="w-px h-5 bg-[#1A263D]"></div>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1A263D] to-[#0B1426] ring-1 ring-[#1A263D] flex items-center justify-center overflow-hidden">
-                <img src="https://res.cloudinary.com/deci4v6zv/image/upload/v1762617272/the-serenity-place-logo-2026-removebg_ze7l7v.png" alt="Bkoimett" className="w-full h-full object-contain" />
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#06B6D4] to-[#3B82F6] flex items-center justify-center">
+                <span className="text-white text-sm font-medium">
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </span>
               </div>
             </div>
           </div>
