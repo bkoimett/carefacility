@@ -1,83 +1,47 @@
 import axios from 'axios'
-import { jwtDecode } from 'jwt-decode'
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
-  headers: { 'Content-Type': 'application/json' }
+const apiClient = axios.create({ baseURL: '/api' })
+
+// Inject token on every request
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('accessToken')
+  if (token && token !== 'undefined' && token !== 'null') {
+    config.headers['Authorization'] = `Bearer ${token}`
+  }
+  return config
 })
 
-// Request interceptor — attach auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('accessToken')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => Promise.reject(error)
+// Unwrap response data only — NO 401 handling here
+// AuthContext handles all auth state via direct fetch
+apiClient.interceptors.response.use(
+  (res) => res,
+  (err) => Promise.reject(err)
 )
 
-// Response interceptor — handle 401
-api.interceptors.response.use(
-  res => res,
-  (error) => {
-    const status = error.response?.status
-    if (status === 401) {
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
-      window.location.href = '/login'
-    }
-    const msg = error.response?.data?.message || error.message || 'Network error'
-    return Promise.reject(new Error(msg))
-  }
-)
-
-// ── Auth ──────────────────────────────────────────────────────────────
-export const authApi = {
-  login: (data) => api.post('/auth/login', data),
-  register: (data) => api.post('/auth/register', data),
-  getMe: () => api.get('/auth/me'),
-}
-
-// ── Clients ──────────────────────────────────────────────────────────
 export const clientsApi = {
-  getAll: (params) => api.get('/clients', { params }),
-  getClientsByStatus: (status) => api.get(`/clients/filter/${status}`),
-  getById: (id) => api.get(`/clients/${id}`),
-  create: (data) => api.post('/clients', data),
-  update: (id, data) => api.put(`/clients/${id}`, data),
-  delete: (id) => api.delete(`/clients/${id}`),
-  discharge: (id) => api.put(`/clients/${id}/discharge`),
-  getBilling: (id) => api.get(`/clients/${id}/billing`),
+  getAll: (params) => apiClient.get('/clients', { params }),
+  getById: (id) => apiClient.get(`/clients/${id}`),
+  create: (data) => apiClient.post('/clients', data),
+  update: (id, data) => apiClient.put(`/clients/${id}`, data),
+  discharge: (id) => apiClient.put(`/clients/${id}/discharge`),
+  delete: (id) => apiClient.delete(`/clients/${id}`),
+  getDebtSummary: () => apiClient.get('/clients/debt-summary'),
+  filter: (status) => apiClient.get(`/clients/filter/${status}`),
+  getClientsByStatus: (status) => apiClient.get(`/clients/filter/${status}`),
 }
 
-// ── Sponsors ─────────────────────────────────────────────────────────
-export const sponsorsApi = {
-  getAll: (params) => api.get('/sponsors', { params }),
-  getById: (id) => api.get(`/sponsors/${id}`),
-  create: (data) => api.post('/sponsors', data),
-  update: (id, data) => api.put(`/sponsors/${id}`, data),
-  delete: (id) => api.delete(`/sponsors/${id}`),
-}
-
-// ── Payments ─────────────────────────────────────────────────────────
 export const paymentsApi = {
-  getAll: (params) => api.get('/payments', { params }),
-  create: (data) => api.post('/payments', data),
-  update: (id, data) => api.put(`/payments/${id}`, data),
-  delete: (id) => api.delete(`/payments/${id}`),
-  getMonthlySummary: () => api.get('/payments/monthly-summary'),
+  getAll: (params) => apiClient.get('/payments', { params }),
+  create: (data) => apiClient.post('/payments', data),
+  update: (id, data) => apiClient.put(`/payments/${id}`, data),
+  delete: (id) => apiClient.delete(`/payments/${id}`),
+  getMonthlySummary: () => apiClient.get('/payments/monthly-summary'),
   getReceipt: async (paymentId) => {
     const token = localStorage.getItem('accessToken')
-    const response = await fetch(
-      `/api/payments/${paymentId}/receipt`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}))
-      throw new Error(err.message ?? `Receipt failed: ${response.status}`)
-    }
+    const response = await fetch(`/api/payments/${paymentId}/receipt`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    if (!response.ok) throw new Error(`Receipt failed: ${response.status}`)
     const blob = await response.blob()
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
@@ -90,30 +54,27 @@ export const paymentsApi = {
   }
 }
 
-// ── Alerts ───────────────────────────────────────────────────────────
+export const sponsorsApi = {
+  getAll: () => apiClient.get('/sponsors'),
+  getById: (id) => apiClient.get(`/sponsors/${id}`),
+  create: (data) => apiClient.post('/sponsors', data),
+  update: (id, data) => apiClient.put(`/sponsors/${id}`, data),
+  delete: (id) => apiClient.delete(`/sponsors/${id}`),
+}
+
 export const alertsApi = {
-  getAll: (params) => api.get('/alerts', { params }),
-  markRead: (id) => api.put(`/alerts/${id}/read`),
-  dismiss: (id) => api.put(`/alerts/${id}/dismiss`),
-  markAllRead: () => api.put('/alerts/mark-all-read'),
-  triggerJob: () => api.post('/alerts/trigger-job'),
+  getAll: (params) => apiClient.get('/alerts', { params }),
+  markRead: (id) => apiClient.put(`/alerts/${id}/read`),
+  dismiss: (id) => apiClient.put(`/alerts/${id}/dismiss`),
+  markAllRead: () => apiClient.put('/alerts/mark-all-read'),
+  triggerJob: () => apiClient.post('/alerts/trigger-job'),
 }
 
-// ── Dashboard ────────────────────────────────────────────────────────
 export const dashboardApi = {
-  getStats: () => api.get('/dashboard/stats'),
-  getPaymentsMonthlySummary: () => api.get('/payments/monthly-summary'),
-  getClientsDebtSummary: () => api.get('/clients/debt-summary'),
+  getStats: () => apiClient.get('/dashboard/stats'),
+  getRevenueTrend: () => apiClient.get('/dashboard/revenue-trend'),
+  getPaymentsMonthlySummary: () => apiClient.get('/payments/monthly-summary'),
+  getClientsDebtSummary: () => apiClient.get('/clients/debt-summary'),
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────
-export const decodeToken = (token) => {
-  try {
-    return jwtDecode(token)
-  } catch {
-    return null
-  }
-}
-
-export default api
-
+export default apiClient
