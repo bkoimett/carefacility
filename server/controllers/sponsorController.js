@@ -10,15 +10,55 @@ exports.getAllSponsors = async (req, res) => {
       { phone: { $regex: search, $options: 'i' } }
     ];
 
-    const sponsors = await Sponsor.find(filter).sort({ name: 1 });
+    const sponsors = await Sponsor.aggregate([
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'clients',
+          localField: '_id',
+          foreignField: 'sponsor',
+          as: 'clients'
+        }
+      },
+      {
+        $lookup: {
+          from: 'payments',
+          let: { sponsorClients: '$clients._id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $in: ['$client', '$$sponsorClients'] }
+              }
+            }
+          ],
+          as: 'payments'
+        }
+      },
+      {
+        $addFields: {
+          clientCount: { $size: '$clients' },
+          activeClientsCount: {
+            $size: {
+              $filter: {
+                input: '$clients',
+                as: 'c',
+                cond: { $eq: ['$$c.status', 'active'] }
+              }
+            }
+          },
+          totalPaid: { $sum: '$payments.amount' }
+        }
+      },
+      {
+        $project: {
+          clients: 0,
+          payments: 0
+        }
+      },
+      { $sort: { name: 1 } }
+    ]);
 
-    // Attach client count to each sponsor
-    const enriched = await Promise.all(sponsors.map(async (s) => {
-      const clientCount = await Client.countDocuments({ sponsor: s._id });
-      return { ...s.toObject(), clientCount };
-    }));
-
-    res.json({ success: true, data: enriched });
+    res.json({ success: true, data: sponsors });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
