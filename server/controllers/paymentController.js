@@ -1,5 +1,7 @@
 const Payment = require('../models/Payment');
 const Client = require('../models/Client');
+const Sponsor = require('../models/Sponsor');
+const { generateReceipt } = require('../utils/receiptGenerator');
 const { computeBillingState } = require('../utils/billingEngine');
 
 // GET /api/payments?clientId=xxx
@@ -128,5 +130,41 @@ exports.deletePayment = async (req, res) => {
     res.json({ success: true, message: 'Payment deleted' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// GET /api/payments/:id/receipt
+exports.getReceipt = async (req, res, next) => {
+  try {
+    const payment = await Payment.findById(req.params.id)
+      .populate('client');
+
+    if (!payment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Payment not found',
+        error: { code: 'PAYMENT_NOT_FOUND' },
+        data: null
+      });
+    }
+
+    const client = payment.client;
+
+    let sponsor = null;
+    const sponsorRef = client?.sponsor;
+    if (sponsorRef) {
+      sponsor = await Sponsor.findById(sponsorRef);
+    }
+
+    const pdfBuffer = await generateReceipt(payment, client, sponsor);
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename="receipt-${payment._id}.pdf"`,
+      'Content-Length': pdfBuffer.length
+    });
+    res.send(pdfBuffer);
+  } catch (err) {
+    next(err);
   }
 };

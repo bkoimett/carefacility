@@ -17,18 +17,20 @@ import { DetailSkeleton } from '../components/SkeletonLoader'
 import { validateClient, validatePayment } from '../utils/validation'
 import ValidationSummary from '../components/ValidationSummary'
 import { showError, showSuccess, showValidationErrors } from '../components/ToastNotifications'
-import { ChevronLeft, Pencil, LogOut, Trash2, CreditCard } from 'lucide-react'
+import { ChevronLeft, Pencil, LogOut, Trash2, CreditCard, FileDown } from 'lucide-react'
 
 export default function ClientDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('Payments')
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [downloadingReceipt, setDownloadingReceipt] = useState(null)
 
-  const { data, loading, error, refetch } = useFetch(
-    () => clientsApi.getById(id),
-    [id]
-  )
+  const { data, loading, error, refetch } =
+    useFetch(
+      () => clientsApi.getById(id),
+      [id]
+    )
   const { run, loading: submitting } = useAsync()
 
   const client = data
@@ -84,6 +86,18 @@ export default function ClientDetailPage() {
     document.getElementById('discharge-confirm').close()
     refetch()
     showSuccess('Client discharged successfully')
+  }
+
+  const handleDownloadReceipt = async (paymentId) => {
+    try {
+      setDownloadingReceipt(paymentId)
+      await paymentsApi.getReceipt(paymentId)
+      showSuccess('Receipt downloaded successfully')
+    } catch (err) {
+      showError(err.message || 'Failed to download receipt')
+    } finally {
+      setDownloadingReceipt(null)
+    }
   }
 
   const handleDelete = async () => {
@@ -281,13 +295,28 @@ export default function ClientDetailPage() {
                         <td className="px-4 py-3 text-[#6B7FA3] text-sm max-w-[200px] truncate">
                           {payment.notes || '-'}
                         </td>
-                        <td className="px-4 py-3 text-right">
-                          <button
-                            className="opacity-0 group-hover:opacity-100 text-[#3D4F6B] hover:text-[#EF4444] transition-opacity"
-                            onClick={() => handleDeletePayment(payment._id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                         <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              className="opacity-0 group-hover:opacity-100 text-[#3D4F6B] hover:text-[#06B6D4] transition-opacity p-1 rounded"
+                              onClick={() => handleDownloadReceipt(payment._id)}
+                              disabled={downloadingReceipt === payment._id}
+                              title="Download receipt"
+                            >
+                              {downloadingReceipt === payment._id ? (
+                                <Spinner className="w-4 h-4" />
+                              ) : (
+                                <FileDown className="w-4 h-4" />
+                              )}
+                            </button>
+                            <button
+                              className="opacity-0 group-hover:opacity-100 text-[#3D4F6B] hover:text-[#EF4444] transition-opacity p-1 rounded"
+                              onClick={() => handleDeletePayment(payment._id)}
+                              title="Delete payment"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

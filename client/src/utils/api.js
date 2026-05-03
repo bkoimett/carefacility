@@ -68,6 +68,26 @@ export const paymentsApi = {
   update: (id, data) => api.put(`/payments/${id}`, data),
   delete: (id) => api.delete(`/payments/${id}`),
   getMonthlySummary: () => api.get('/payments/monthly-summary'),
+  getReceipt: async (paymentId) => {
+    const token = localStorage.getItem('accessToken')
+    const response = await fetch(
+      `/api/payments/${paymentId}/receipt`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}))
+      throw new Error(err.message ?? `Receipt failed: ${response.status}`)
+    }
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `receipt-${paymentId}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  }
 }
 
 // ── Alerts ───────────────────────────────────────────────────────────
