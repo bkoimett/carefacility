@@ -33,12 +33,23 @@ export default function PaymentForm({ clientName, onSubmit, loading }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    const amount = Number(form.amount)
-    if (!amount) {
-      setErrors({ amount: 'Amount is required' })
-      return
+    // Temporarily disable validation to debug payment blocking
+    // const amount = Number(form.amount)
+    // if (!amount) {
+    //   setErrors({ amount: 'Amount is required' })
+    //   return
+    // }
+    const payload = {
+      amount: Number(form.amount) || 0,
+      paymentDate: form.paymentDate,
+      paymentMethod: form.paymentMethod || 'cash',
+      paymentType: form.paymentType || 'monthly_fee',
+      reference: form.reference || '',
+      paidBy: form.paidBy || '',
+      billingPeriodLabel: form.billingPeriodLabel || '',
+      notes: form.notes || '',
     }
-    onSubmit({ ...form, amount })
+    onSubmit(payload)
     setForm(defaultForm)
   }
 
