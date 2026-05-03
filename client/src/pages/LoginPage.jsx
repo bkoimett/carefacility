@@ -18,12 +18,14 @@ export default function LoginPage() {
     setError('')
     setIsLoading(true)
 
+    console.log('[LOGINPAGE] submit fired')
+
     try {
-      const success = await login(email, password)
-      if (success) {
+      const result = await login(email, password)
+      if (result.success) {
         navigate('/')
       } else {
-        setError('Invalid email or password')
+        setError(result.message ?? 'Invalid email or password')
       }
     } catch (err) {
       setError(err.message || 'Login failed')

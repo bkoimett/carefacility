@@ -1,63 +1,103 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { authApi } from '../utils/api'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
 
-const AuthContext = createContext()
+const AuthContext = createContext(null)
 
-export function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-
-  const login = useCallback(async (email, password) => {
-    try {
-      const response = await authApi.login({ email, password })
-      const { user, accessToken, refreshToken } = response.data.data
-
-      localStorage.setItem('accessToken', accessToken)
-      localStorage.setItem('refreshToken', refreshToken)
-      setUser(user)
-      setIsAuthenticated(true)
-      return true
-    } catch (err) {
-      console.error('Login failed:', err)
-      return false
-    }
-  }, [])
-
-  const logout = useCallback(() => {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
-    setUser(null)
-    setIsAuthenticated(false)
-    window.location.href = '/login'
-  }, [])
+  const initialized = useRef(false)
 
   useEffect(() => {
+    if (initialized.current) return
+    initialized.current = true
+
     const initAuth = async () => {
       const token = localStorage.getItem('accessToken')
-      if (!token) {
+
+      if (!token || token === 'undefined' || token === 'null') {
         setIsLoading(false)
         return
       }
 
       try {
-        const response = await authApi.getMe()
-        setUser(response.data.data.user)
-        setIsAuthenticated(true)
+        const res = await fetch('/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+
+        if (res.ok) {
+          const data = await res.json()
+          const userData = data?.data?.user
+            ?? data?.data
+            ?? data?.user
+            ?? data
+          setUser(userData)
+          setIsAuthenticated(true)
+        } else if (res.status === 401) {
+          localStorage.removeItem('accessToken')
+          localStorage.removeItem('refreshToken')
+          setIsAuthenticated(false)
+          setUser(null)
+        }
+        // 500 or other errors — keep user logged in, try again next load
       } catch (err) {
-        console.error('Auth check failed:', err)
-        logout()
-        return
+        console.error('[AUTH] init error:', err.message)
+        // Network error — do NOT clear token
       } finally {
-        setIsLoading(false)
+        setIsLoading(false)  // always, no conditions
       }
     }
 
     initAuth()
-  }, [logout])
+  }, [])
+
+  const login = async (email, password) => {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        return { success: false, message: data.message ?? 'Login failed' }
+      }
+
+      const tokenData = data?.data
+      if (!tokenData?.accessToken) {
+        console.error('[LOGIN] unexpected response shape:', data)
+        return { success: false, message: 'Invalid server response' }
+      }
+
+      localStorage.setItem('accessToken', tokenData.accessToken)
+      localStorage.setItem('refreshToken', tokenData.refreshToken ?? '')
+
+      setUser(tokenData.user)
+      setIsAuthenticated(true)
+      return { success: true }
+    } catch (err) {
+      console.error('[LOGIN] network error:', err)
+      return { success: false, message: 'Network error. Try again.' }
+    }
+  }
+
+  const logout = () => {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    setUser(null)
+    setIsAuthenticated(false)
+    window.location.href = '/login'
+  }
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider value={{
+      user, isAuthenticated, isLoading, login, logout
+    }}>
       {children}
     </AuthContext.Provider>
   )
@@ -65,8 +105,8 @@ export function AuthProvider({ children }) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider')
   return context
 }
+
+export default AuthContext
