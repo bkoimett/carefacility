@@ -1,17 +1,44 @@
 import axios from 'axios'
+import { jwtDecode } from 'jwt-decode'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: { 'Content-Type': 'application/json' }
 })
 
+// Request interceptor — attach auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('accessToken')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
+
+// Response interceptor — handle 401
 api.interceptors.response.use(
   res => res,
-  err => {
-    const msg = err.response?.data?.message || err.message || 'Network error'
+  (error) => {
+    const status = error.response?.status
+    if (status === 401) {
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      window.location.href = '/login'
+    }
+    const msg = error.response?.data?.message || error.message || 'Network error'
     return Promise.reject(new Error(msg))
   }
 )
+
+// ── Auth ──────────────────────────────────────────────────────────────
+export const authApi = {
+  login: (data) => api.post('/auth/login', data),
+  register: (data) => api.post('/auth/register', data),
+  getMe: () => api.get('/auth/me'),
+}
 
 // ── Clients ──────────────────────────────────────────────────────────
 export const clientsApi = {
@@ -59,4 +86,14 @@ export const dashboardApi = {
   getClientsDebtSummary: () => api.get('/clients/debt-summary'),
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────
+export const decodeToken = (token) => {
+  try {
+    return jwtDecode(token)
+  } catch {
+    return null
+  }
+}
+
 export default api
+

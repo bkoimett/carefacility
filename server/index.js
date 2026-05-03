@@ -9,6 +9,9 @@ const sponsorRoutes = require('./routes/sponsors');
 const paymentRoutes = require('./routes/payments');
 const alertRoutes = require('./routes/alerts');
 const dashboardRoutes = require('./routes/dashboard');
+const authRoutes = require('./routes/auth');
+
+const { protect } = require('./middleware/auth');
 
 const { runDailyAlertJob } = require('./utils/cronJobs');
 
@@ -23,11 +26,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api/clients', clientRoutes);
-app.use('/api/sponsors', sponsorRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/alerts', alertRoutes);
-app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/clients', protect, clientRoutes);
+app.use('/api/sponsors', protect, sponsorRoutes);
+app.use('/api/payments', protect, paymentRoutes);
+app.use('/api/alerts', protect, alertRoutes);
+app.use('/api/dashboard', protect, dashboardRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
