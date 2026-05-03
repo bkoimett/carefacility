@@ -28,6 +28,7 @@ exports.getPayments = async (req, res) => {
 
 // POST /api/payments
 exports.createPayment = async (req, res) => {
+  console.log('CREATE PAYMENT HIT:', req.body);
   try {
     const { clientId, amount, paymentDate, paymentMethod, reference, paidBy, paymentType, notes, billingPeriodLabel } = req.body;
 
