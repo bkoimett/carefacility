@@ -1,6 +1,9 @@
 import axios from 'axios'
 
-const apiClient = axios.create({ baseURL: '/api' })
+// Use environment-specific base URL
+const baseURL = import.meta.env.VITE_API_URL || '/api'
+
+const apiClient = axios.create({ baseURL })
 
 // Inject token on every request
 apiClient.interceptors.request.use((config) => {
