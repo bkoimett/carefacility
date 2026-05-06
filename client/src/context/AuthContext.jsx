@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     if (initialized.current) return
     initialized.current = true
 
-    const initAuth = async () => {
+     const initAuth = async () => {
       const token = localStorage.getItem('accessToken')
 
       if (!token || token === 'undefined' || token === 'null') {
@@ -21,7 +21,9 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const res = await fetch('/api/auth/me', {
+        // Use absolute URL in production, relative in development
+        const apiBase = import.meta.env.VITE_API_URL || ''
+        const res = await fetch(`${apiBase}/api/auth/me`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -56,7 +58,9 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const res = await fetch('/api/auth/login', {
+      // Use absolute URL in production, relative in development
+      const apiBase = import.meta.env.VITE_API_URL || ''
+      const res = await fetch(`${apiBase}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -82,7 +86,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true }
     } catch (err) {
       console.error('[LOGIN] network error:', err)
-      return { success: false, message: 'Network error. Try again.' }
+      return { success: false, message: err.message || 'Network error. Try again.' }
     }
   }
 
