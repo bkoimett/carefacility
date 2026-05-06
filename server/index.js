@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const morgan = require('morgan');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
 
@@ -17,17 +18,77 @@ const { runDailyAlertJob } = require('./utils/cronJobs');
 
 const app = express();
 
-// Middleware
-app.use(cors({
-  origin: [
-    process.env.CLIENT_URL,
-    'http://localhost:5173',
-    'https://carefacility-backend.onrender.com' 
-  ].filter(Boolean),
-  credentials: true
-}));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Request logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} - Incoming`);
+  
+  // Log request body for POST/PUT (excluding sensitive data for login)
+  if (req.method === 'POST' && req.body && Object.keys(req.body).length > 0) {
+    const logBody = { ...req.body };
+    if (req.url.includes('login') || req.url.includes('register')) {
+      logBody.password = '[REDACTED]';
+    }
+    console.log(`[${new Date().toISOString()}] Request body:`, JSON.stringify(logBody));
+  }
+
+  const originalSend = res.send;
+  res.send = function (body) {
+    const duration = Date.now() - start;
+    const status = res.statusCode;
+    const statusColor = status >= 500 ? '🔴' : status >= 400 ? '🟠' : status >= 300 ? '🟡' : '🟢';
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} ${statusColor} ${status} ${duration}ms`);
+    if (body && typeof body === 'object' && !Buffer.isBuffer(body)) {
+      console.log(`[${new Date().toISOString()}] Response:`, JSON.stringify(body).substring(0, 500));
+    }
+    return originalSend.call(this, body);
+  };
+  next();
+});
+
+// CORS configuration
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://carefacility-git-main-bwanachairmans-projects.vercel.app',
+  /.vercel\.app$/,
+  /.vercel\.sh$/,
+].filter(Boolean);
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check against allowed origins (including regex patterns)
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (allowed instanceof RegExp) {
+        return allowed.test(origin);
+      }
+      return allowed === origin;
+    });
+
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.log(`[${new Date().toISOString()}] CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Authorization']
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -44,10 +105,21 @@ app.get('/api/health', (req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error(`[${new Date().toISOString()}] ❌ Error:`, err.stack);
+  
+  // CORS error handling
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({
+      success: false,
+      message: 'CORS blocked: Origin not allowed',
+      error: { code: 'CORS_ERROR' }
+    });
+  }
+  
   res.status(err.status || 500).json({
     success: false,
-    message: err.message || 'Internal Server Error'
+    message: err.message || 'Internal Server Error',
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
   });
 });
 
