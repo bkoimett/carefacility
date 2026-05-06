@@ -1,14 +1,15 @@
 import axios from 'axios'
 
 // Use environment-specific base URL
-// In production (Vercel), VITE_API_URL should be set to the full Render backend URL (e.g., https://carefacility-backend.onrender.com)
+// In production (Vercel), VITE_API_URL should be set to the full Render backend URL WITHOUT /api
+// e.g., https://carefacility-backend.onrender.com
 // In development, it falls back to relative /api paths
-const baseURL = import.meta.env.VITE_API_URL || '/api'
+const baseURL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api'
 
 const apiClient = axios.create({ 
-  baseURL,
-  timeout: 30000, // 30 second timeout
-  withCredentials: true // Include cookies/credentials for CORS requests
+  baseURL, 
+  timeout: 30000,
+  withCredentials: true
 })
 
 // Log requests for debugging
@@ -24,8 +25,7 @@ apiClient.interceptors.request.use((config) => {
   return Promise.reject(err)
 })
 
-// Unwrap response data only — NO 401 handling here
-// AuthContext handles all auth state via direct fetch
+// Response interceptor with logging
 apiClient.interceptors.response.use(
   (res) => {
     console.log(`[API] ${res.status} ${res.config.method?.toUpperCase()} ${res.config.url}`, res.data)
@@ -57,8 +57,7 @@ export const paymentsApi = {
   getMonthlySummary: () => apiClient.get('/payments/monthly-summary'),
   getReceipt: async (paymentId) => {
     const token = localStorage.getItem('accessToken')
-    const apiBase = import.meta.env.VITE_API_URL || ''
-    const response = await fetch(`${apiBase}/api/payments/${paymentId}/receipt`, {
+    const response = await fetch(`${baseURL}/payments/${paymentId}/receipt`, {
       headers: { Authorization: `Bearer ${token}` }
     })
     if (!response.ok) throw new Error(`Receipt failed: ${response.status}`)

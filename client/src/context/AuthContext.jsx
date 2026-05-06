@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react'
+import apiClient from '../utils/api'
 
 const AuthContext = createContext(null)
 
@@ -12,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     if (initialized.current) return
     initialized.current = true
 
-     const initAuth = async () => {
+  const initAuth = async () => {
       const token = localStorage.getItem('accessToken')
 
       if (!token || token === 'undefined' || token === 'null') {
@@ -21,24 +22,17 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        // Use absolute URL in production, relative in development
-        const apiBase = import.meta.env.VITE_API_URL || ''
-        const res = await fetch(`${apiBase}/api/auth/me`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        })
+        const res = await apiClient.get('/auth/me')
 
-        if (res.ok) {
-          const data = await res.json()
+        if (res && res.status === 200) {
+          const data = res.data
           const userData = data?.data?.user
             ?? data?.data
             ?? data?.user
             ?? data
           setUser(userData)
           setIsAuthenticated(true)
-        } else if (res.status === 401) {
+        } else if (res?.status === 401) {
           localStorage.removeItem('accessToken')
           localStorage.removeItem('refreshToken')
           setIsAuthenticated(false)
@@ -58,18 +52,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // Use absolute URL in production, relative in development
-      const apiBase = import.meta.env.VITE_API_URL || ''
-      const res = await fetch(`${apiBase}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
+      const res = await apiClient.post('/auth/login', { email, password })
 
-      const data = await res.json()
+      const data = res.data
 
-      if (!res.ok) {
-        return { success: false, message: data.message ?? 'Login failed' }
+      if (!res || res.status !== 200) {
+        return { success: false, message: data?.message ?? 'Login failed' }
       }
 
       const tokenData = data?.data
@@ -86,7 +74,8 @@ export const AuthProvider = ({ children }) => {
       return { success: true }
     } catch (err) {
       console.error('[LOGIN] network error:', err)
-      return { success: false, message: err.message || 'Network error. Try again.' }
+      const message = err.response?.data?.message || err.message || 'Network error. Try again.'
+      return { success: false, message }
     }
   }
 
