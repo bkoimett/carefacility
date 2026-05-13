@@ -13,6 +13,11 @@ import {
 } from 'lucide-react'
 import { alertsApi } from '../../utils/api'
 import { useAuth } from '../../context/AuthContext'
+import DemoBanner from '../DemoBanner'
+
+// Demo banner should only render when demo mode is active (handled inside component via logout label, but we keep it conditional here)
+
+
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -260,8 +265,11 @@ export default function Layout() {
 
         {/* Page Content */}
         <main className="flex-1 overflow-auto p-6">
+          {user?.isDemoMode ? <DemoBanner /> : null}
+
           <Outlet />
         </main>
+
       </div>
     </div>
   )

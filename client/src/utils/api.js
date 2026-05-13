@@ -96,4 +96,60 @@ export const dashboardApi = {
   getClientsDebtSummary: () => apiClient.get('/clients/debt-summary'),
 }
 
+
+// Demo mode support (session-based)
+import { getMockDataForEndpoint } from '../demo/data'
+
+function isDemoModeActive() {
+  return sessionStorage.getItem('demoMode') === 'true'
+}
+
+apiClient.interceptors.request.use((config) => {
+  if (!isDemoModeActive()) return config
+
+  // Never mock auth/me/login; demo bypass should avoid them.
+  const url = config.url || ''
+  if (url.includes('/auth/me') || url.includes('/auth/login')) return config
+
+  // axios request interceptor can't truly cancel the request; we return a special config and handle in adapter.
+  // Instead, we short-circuit in the response interceptor by returning mock data.
+  return config
+})
+
+apiClient.interceptors.response.use(
+  (res) => {
+    if (!isDemoModeActive()) return res
+    const configUrl = res?.config?.url || ''
+    // If request actually succeeded (backend available), keep it.
+    return res
+  },
+  async (err) => {
+    // If we are in demo mode, return mock data for the failed request.
+    if (isDemoModeActive()) {
+      const config = err?.config
+      const url = config?.url || ''
+      const axiosConfig = {
+        params: config?.params,
+        method: config?.method
+      }
+
+      // Simulate latency ~300ms
+      await new Promise(resolve => setTimeout(resolve, 300))
+
+      try {
+        const mockRes = getMockDataForEndpoint(url, axiosConfig)
+        return mockRes
+      } catch (mockErr) {
+        console.error('[DEMO] mock failed:', mockErr)
+      }
+    }
+
+    return Promise.reject(err)
+  }
+)
+
+// Demo mode support (session-based) must be declared before endpoint exports for ESM correctness.
+export { apiClient } 
 export default apiClient
+
+

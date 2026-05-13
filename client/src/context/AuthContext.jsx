@@ -3,9 +3,17 @@ import apiClient from '../utils/api'
 
 const AuthContext = createContext(null)
 
+const demoUser = {
+  _id: 'demo_user',
+  name: 'Demo User',
+  email: 'demo@carefacility.com',
+  role: 'admin'
+}
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isDemoMode, setIsDemoMode] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const initialized = useRef(false)
 
@@ -13,7 +21,17 @@ export const AuthProvider = ({ children }) => {
     if (initialized.current) return
     initialized.current = true
 
-  const initAuth = async () => {
+    const initAuth = async () => {
+      const demoMode = sessionStorage.getItem('demoMode') === 'true'
+
+      if (demoMode) {
+        setIsDemoMode(true)
+        setUser(demoUser)
+        setIsAuthenticated(true)
+        setIsLoading(false)
+        return
+      }
+
       const token = localStorage.getItem('accessToken')
 
       if (!token || token === 'undefined' || token === 'null') {
@@ -32,11 +50,13 @@ export const AuthProvider = ({ children }) => {
             ?? data
           setUser(userData)
           setIsAuthenticated(true)
+          setIsDemoMode(false)
         } else if (res?.status === 401) {
           localStorage.removeItem('accessToken')
           localStorage.removeItem('refreshToken')
           setIsAuthenticated(false)
           setUser(null)
+          setIsDemoMode(false)
         }
         // 500 or other errors — keep user logged in, try again next load
       } catch (err) {
@@ -49,6 +69,15 @@ export const AuthProvider = ({ children }) => {
 
     initAuth()
   }, [])
+
+  const loginDemo = () => {
+    sessionStorage.setItem('demoMode', 'true')
+    setUser(demoUser)
+    setIsAuthenticated(true)
+    setIsDemoMode(true)
+    setIsLoading(false)
+    return { success: true }
+  }
 
   const login = async (email, password) => {
     try {
@@ -66,6 +95,9 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: 'Invalid server response' }
       }
 
+      sessionStorage.removeItem('demoMode')
+      setIsDemoMode(false)
+
       localStorage.setItem('accessToken', tokenData.accessToken)
       localStorage.setItem('refreshToken', tokenData.refreshToken ?? '')
 
@@ -82,15 +114,25 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
+    sessionStorage.removeItem('demoMode')
     setUser(null)
     setIsAuthenticated(false)
+    setIsDemoMode(false)
     window.location.href = '/login'
   }
 
   return (
-    <AuthContext.Provider value={{
-      user, isAuthenticated, isLoading, login, logout
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated,
+        isDemoMode,
+        isLoading,
+        login,
+        loginDemo,
+        logout
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )
@@ -103,3 +145,4 @@ export const useAuth = () => {
 }
 
 export default AuthContext
+

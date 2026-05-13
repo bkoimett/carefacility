@@ -5,7 +5,8 @@ import { Eye, EyeOff, AlertCircle, Building2 } from 'lucide-react'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { login, loginDemo } = useAuth()
+
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -101,7 +102,36 @@ export default function LoginPage() {
           </div>
 
           {/* Form card */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-6">
+            <div className="bg-[#0B1426] border border-[#1A263D] rounded-[12px] p-3">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    // no-op: main site is default
+                  }}
+                  className="flex-1 btn-premium text-xs py-2 border border-[#1A263D] bg-[#1A263D] text-[#F0F4FF]"
+                >
+                  Main Site
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const res = loginDemo()
+                    if (res?.success) navigate('/')
+                  }}
+                  className="flex-1 btn-premium text-xs py-2 border border-[#06B6D4] bg-[rgba(6,182,212,0.08)] text-[#06B6D4] hover:bg-[rgba(6,182,212,0.14)]"
+                >
+                  Demo Mode
+                </button>
+              </div>
+              <p className="text-[#6B7FA3] text-[11px] mt-2">
+                Explore with sample data — no account needed
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-[#6B7FA3] text-xs font-medium mb-1.5">
@@ -177,8 +207,10 @@ export default function LoginPage() {
             <p className="text-[#3D4F6B] text-xs text-center mt-6">
               Protected system — authorized personnel only
             </p>
-          </form>
+            </form>
+          </div>
         </div>
+
       </div>
     </div>
   )
