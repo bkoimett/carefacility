@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Eye, EyeOff, AlertCircle, Building2 } from 'lucide-react'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const location = useLocation()
-  const { login, isAuthenticated, isLoading: isAuthLoading } = useAuth()
   const isSignupRoute = location.pathname === '/signup'
 
   const [email, setEmail] = useState('')
@@ -14,12 +14,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-
-  useEffect(() => {
-    if (!isAuthLoading && isAuthenticated) {
-      navigate('/dashboard', { replace: true })
-    }
-  }, [isAuthLoading, isAuthenticated, navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -185,7 +179,7 @@ export default function LoginPage() {
             {isSignupRoute ? (
               <div className="text-center">
                 <Link
-                  to="/"
+                  to="/login"
                   className="text-[#06B6D4] text-sm font-medium hover:text-[#22D3EE] transition-colors"
                 >
                   Back to login
