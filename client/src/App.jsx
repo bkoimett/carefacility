@@ -19,12 +19,13 @@ export default function App() {
           <BrowserRouter>
             <Routes>
               {/* Public route */}
-              <Route path="/login" element={<LoginPage />} />
+              <Route path="/" element={<LoginPage />} />
+              <Route path="/login" element={<Navigate to="/" replace />} />
+              <Route path="/signup" element={<LoginPage />} />
 
               {/* Protected routes */}
               <Route element={<ProtectedRoute />}>
                 <Route element={<Layout />}>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="clients" element={<ClientsPage />} />
                   <Route path="clients/:id" element={<ClientDetailPage />} />
