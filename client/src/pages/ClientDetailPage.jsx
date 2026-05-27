@@ -214,13 +214,13 @@ export default function ClientDetailPage() {
           <p className="text-[#10B981] text-xl font-bold font-['DM_Serif_Display']">{formatKES(totalPaid)}</p>
         </div>
 
-        {/* Outstanding Balance */}
-        <div className="card-premium p-4">
-          <p className="text-[#3D4F6B] text-xs tracking-wider uppercase mb-2">Outstanding Balance</p>
-          <p className={`text-xl font-bold font-['DM_Serif_Display'] ${outstandingBalance < 0 ? 'text-[#10B981]' : outstandingBalance > 0 ? 'text-[#EF4444]' : 'text-[#F0F4FF]'}`}>
-            {formatKES(outstandingBalance)}
-          </p>
-        </div>
+         {/* Outstanding Balance */}
+         <div className="card-premium p-4">
+           <p className="text-[#3D4F6B] text-xs tracking-wider uppercase mb-2">Outstanding Balance</p>
+           <p className={`text-xl font-bold font-['DM_Serif_Display'] ${outstandingBalance < 0 ? 'text-[#EF4444]' : outstandingBalance > 0 ? 'text-[#10B981]' : 'text-[#F0F4FF]'}`}>
+             {formatKES(outstandingBalance)}
+           </p>
+         </div>
 
         {/* Days Admitted */}
         <div className="card-premium p-4">
@@ -418,12 +418,12 @@ export default function ClientDetailPage() {
                   <span className="text-[#3D4F6B] text-xs tracking-wide uppercase">Total Paid</span>
                   <span className="text-[#10B981] text-sm font-mono text-right">{formatKES(billing?.totalPaid)}</span>
                 </div>
-                <div className="flex items-start justify-between">
-                  <span className="text-[#3D4F6B] text-xs tracking-wide uppercase">Current Balance</span>
-                  <span className={`text-sm font-mono text-right ${billing?.balance < 0 ? 'text-[#10B981]' : billing?.balance > 0 ? 'text-[#EF4444]' : 'text-[#F0F4FF]'}`}>
-                    {formatKES(billing?.balance)}
-                  </span>
-                </div>
+                 <div className="flex items-start justify-between">
+                   <span className="text-[#3D4F6B] text-xs tracking-wide uppercase">Current Balance</span>
+                   <span className={`text-sm font-mono text-right ${billing?.balance < 0 ? 'text-[#EF4444]' : billing?.balance > 0 ? 'text-[#10B981]' : 'text-[#F0F4FF]'}`}>
+                     {formatKES(billing?.balance)}
+                   </span>
+                 </div>
               </div>
             </div>
 

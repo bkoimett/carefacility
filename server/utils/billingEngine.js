@@ -91,20 +91,20 @@ function computeBillingState(client, payments = []) {
   });
   totalCharged += month1Total;
 
-  // ── Months 2 → agreedDurationMonths ─────────────────────────────────
-  for (let m = 2; m <= client.agreedDurationMonths; m++) {
-    const dueDate = addDays(admission, m * 30);
-    if (isBefore(dueDate, addDays(endDate, 1))) {
-      breakdown.push({
-        label: `Month ${m} – Monthly Fee`,
-        amount: effectiveMonthlyFee,
-        dueDate,
-        type: 'monthly_fee',
-        periodKey: `M${m}`
-      });
-      totalCharged += effectiveMonthlyFee;
-    }
-  }
+   // ── Months 2 → agreedDurationMonths ─────────────────────────────────
+   for (let m = 2; m <= client.agreedDurationMonths; m++) {
+     const dueDate = addDays(admission, (m - 1) * 30);
+     if (isBefore(dueDate, addDays(endDate, 1))) {
+       breakdown.push({
+         label: `Month ${m} – Monthly Fee`,
+         amount: effectiveMonthlyFee,
+         dueDate,
+         type: 'monthly_fee',
+         periodKey: `M${m}`
+       });
+       totalCharged += effectiveMonthlyFee;
+     }
+   }
 
   // ── Post-expiry daily charges ────────────────────────────────────────
   let daysPostExpiry = 0;
@@ -128,9 +128,12 @@ function computeBillingState(client, payments = []) {
     }
   }
 
-  // ── Totals ───────────────────────────────────────────────────────────
-  const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
-  const balance = totalPaid - totalCharged; // positive = credit, negative = owes
+   // ── Totals ───────────────────────────────────────────────────────────
+   const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+   // balance is always running total: positive = credit, negative = owes
+   // unpaid months automatically carry forward since totalCharged 
+   // accumulates all elapsed periods
+   const balance = totalPaid - totalCharged;
 
   return {
     totalCharged,
@@ -189,10 +192,10 @@ function getAlertsForClient(client, payments = []) {
     });
   }
 
-  // MONTHLY_FEE_DUE – 5 days after each 30-day mark within agreed duration
-  for (let m = 2; m <= client.agreedDurationMonths; m++) {
-    const dueDay = m * 30;
-    if (daysElapsed >= dueDay + 5 && daysElapsed <= dueDay + 10) {
+   // MONTHLY_FEE_DUE – 5 days after each 30-day mark within agreed duration
+   for (let m = 2; m <= client.agreedDurationMonths; m++) {
+     const dueDay = (m - 1) * 30;
+     if (daysElapsed >= dueDay + 5 && daysElapsed <= dueDay + 10) {
       const monthCharged = billing.breakdown
         .filter(b => b.periodKey === `M${m}`)
         .reduce((s, b) => s + b.amount, 0);
@@ -256,3 +259,5 @@ module.exports = {
   parseCommentDirectives,
   DAILY_RATE
 };
+
+
