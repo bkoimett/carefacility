@@ -10,6 +10,7 @@ import SponsorsPage from './pages/SponsorsPage'
 import AlertsPage from './pages/AlertsPage'
 import LoginPage from './pages/LoginPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import SettingsPage from './pages/SettingsPage'
 
 export default function App() {
   return (
@@ -21,17 +22,18 @@ export default function App() {
               {/* Public route */}
               <Route path="/login" element={<LoginPage />} />
 
-              {/* Protected routes */}
-              <Route element={<ProtectedRoute />}>
-                <Route element={<Layout />}>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="clients" element={<ClientsPage />} />
-                  <Route path="clients/:id" element={<ClientDetailPage />} />
-                  <Route path="sponsors" element={<SponsorsPage />} />
-                  <Route path="alerts" element={<AlertsPage />} />
-                </Route>
-              </Route>
+               {/* Protected routes */}
+               <Route element={<ProtectedRoute />}>
+                 <Route element={<Layout />}>
+                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                   <Route path="dashboard" element={<Dashboard />} />
+                   <Route path="clients" element={<ClientsPage />} />
+                   <Route path="clients/:id" element={<ClientDetailPage />} />
+                   <Route path="sponsors" element={<SponsorsPage />} />
+                   <Route path="alerts" element={<AlertsPage />} />
+                   <Route path="settings" element={<SettingsPage />} />
+                 </Route>
+               </Route>
 
               {/* Catch all */}
               <Route path="*" element={<Navigate to="/" replace />} />

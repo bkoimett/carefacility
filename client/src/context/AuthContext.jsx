@@ -79,21 +79,79 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  const logout = () => {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
-    setUser(null)
-    setIsAuthenticated(false)
-    window.location.href = '/login'
-  }
+   const logout = () => {
+     localStorage.removeItem('accessToken')
+     localStorage.removeItem('refreshToken')
+     setUser(null)
+     setIsAuthenticated(false)
+     window.location.href = '/login'
+   }
 
-  return (
-    <AuthContext.Provider value={{
-      user, isAuthenticated, isLoading, login, logout
-    }}>
-      {children}
-    </AuthContext.Provider>
-  )
+   const updateProfile = async (profileData) => {
+     try {
+       const response = await apiClient.patch('/auth/profile', profileData)
+       setUser(response.data.user)
+       return { success: true, user: response.data.user }
+     } catch (error) {
+       return { success: false, error: error.response?.data?.message || 'Update failed' }
+     }
+   }
+
+   const changePassword = async (passwordData) => {
+     try {
+       await apiClient.patch('/auth/change-password', passwordData)
+       return { success: true, message: 'Password changed successfully' }
+     } catch (error) {
+       return { success: false, error: error.response?.data?.message || 'Password change failed' }
+     }
+   }
+
+   const getAllUsers = async () => {
+     try {
+       const response = await apiClient.get('/auth/users')
+       return response.data
+     } catch (error) {
+       console.error('Failed to fetch users:', error)
+       return []
+     }
+   }
+
+   const createUser = async (userData) => {
+     try {
+       const response = await apiClient.post('/auth/users', userData)
+       return { success: true, user: response.data.user }
+     } catch (error) {
+       return { success: false, error: error.response?.data?.message || 'User creation failed' }
+     }
+   }
+
+   const updateUser = async (userId, userData) => {
+     try {
+       const response = await apiClient.put(`/auth/users/${userId}`, userData)
+       return { success: true, user: response.data.user }
+     } catch (error) {
+       return { success: false, error: error.response?.data?.message || 'User update failed' }
+     }
+   }
+
+   const deleteUser = async (userId) => {
+     try {
+       await apiClient.delete(`/auth/users/${userId}`)
+       return { success: true }
+     } catch (error) {
+       return { success: false, error: error.response?.data?.message || 'User deletion failed' }
+     }
+   }
+
+   return (
+     <AuthContext.Provider value={{
+       user, isAuthenticated, isLoading, login, logout,
+       updateProfile, changePassword,
+       getAllUsers, createUser, updateUser, deleteUser
+     }}>
+       {children}
+     </AuthContext.Provider>
+   )
 }
 
 export const useAuth = () => {
