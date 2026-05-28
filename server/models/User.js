@@ -2,40 +2,23 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'User name is required'],
-    trim: true
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true, lowercase: true },
+  password: { type: String, required: true },
+  role: { 
+    type: String, 
+    enum: ['superadmin', 'admin', 'staff'], 
+    default: 'staff' 
   },
-  email: {
-    type: String,
-    required: [true, 'Email is required'],
-    unique: true,
-    lowercase: true,
-    trim: true
-  },
-  password: {
-    type: String,
-    required: [true, 'Password is required'],
-    minlength: [8, 'Password must be at least 8 characters']
-  },
-  role: {
-    type: String,
-    enum: ['admin', 'staff'],
-    default: 'staff'
-  },
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  lastLogin: {
-    type: Date
+  isActive: { type: Boolean, default: true },
+  lastLogin: Date,
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  preferences: {
+    theme: { type: String, default: 'careclinic' },
+    fontSize: { type: String, default: 'medium' },
+    notificationsEnabled: { type: Boolean, default: true }
   }
-}, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
+}, { timestamps: true })
 
 // Hash password before save
 userSchema.pre('save', async function(next) {

@@ -89,6 +89,16 @@ export const alertsApi = {
   triggerJob: () => apiClient.post('/alerts/trigger-job'),
 }
 
+export const authApi = {
+  getMe: () => apiClient.get('/auth/me'),
+  updateProfile: (data) => apiClient.patch('/auth/profile', data),
+  changePassword: (data) => apiClient.patch('/auth/change-password', data),
+  getAllUsers: () => apiClient.get('/auth/users'),
+  createUser: (data) => apiClient.post('/auth/users', data),
+  updateUser: (id, data) => apiClient.put(`/auth/users/${id}`, data),
+  deleteUser: (id) => apiClient.delete(`/auth/users/${id}`),
+}
+
 export const dashboardApi = {
   getStats: () => apiClient.get('/dashboard/stats'),
   getRevenueTrend: () => apiClient.get('/dashboard/revenue-trend'),
