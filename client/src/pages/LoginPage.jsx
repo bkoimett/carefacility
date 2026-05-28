@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Eye, EyeOff, AlertCircle, Building2 } from 'lucide-react'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const { login } = useAuth()
+  const location = useLocation()
+  const isSignupRoute = location.pathname === '/signup'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -93,10 +95,10 @@ export default function LoginPage() {
           {/* Header */}
           <div>
             <h1 className="text-[#F0F4FF] text-2xl font-semibold">
-              Welcome back
+              {isSignupRoute ? 'Sign-up isn’t available yet' : 'Welcome back'}
             </h1>
             <p className="text-[#6B7FA3] text-sm mt-1">
-              Sign in to your account
+              {isSignupRoute ? 'Use login for now and contact your administrator to create an account.' : 'Sign in to your account'}
             </p>
           </div>
 
@@ -174,6 +176,27 @@ export default function LoginPage() {
             </button>
 
             {/* Footer */}
+            {isSignupRoute ? (
+              <div className="text-center">
+                <Link
+                  to="/login"
+                  className="text-[#06B6D4] text-sm font-medium hover:text-[#22D3EE] transition-colors"
+                >
+                  Back to login
+                </Link>
+              </div>
+            ) : (
+              <div className="text-center">
+                <span className="text-[#6B7FA3] text-sm">Don&apos;t have an account? </span>
+                <Link
+                  to="/signup"
+                  className="text-[#06B6D4] text-sm font-medium hover:text-[#22D3EE] transition-colors"
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
+
             <p className="text-[#3D4F6B] text-xs text-center mt-6">
               Protected system — authorized personnel only
             </p>
