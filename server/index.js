@@ -11,6 +11,7 @@ const paymentRoutes = require('./routes/payments');
 const alertRoutes = require('./routes/alerts');
 const dashboardRoutes = require('./routes/dashboard');
 const authRoutes = require('./routes/auth');
+const auditRoutes = require('./routes/audit');
 
 const { protect } = require('./middleware/auth');
 
@@ -97,6 +98,7 @@ app.use('/api/sponsors', protect, sponsorRoutes);
 app.use('/api/payments', protect, paymentRoutes);
 app.use('/api/alerts', protect, alertRoutes);
 app.use('/api/dashboard', protect, dashboardRoutes);
+app.use('/api/audit', protect, auditRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
